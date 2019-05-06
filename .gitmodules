@@ -1,3 +1,9 @@
 [submodule "themes/replica"]
 	path = themes/replica
 	url = https://github.com/sabrinaluo/hexo-theme-replica.git
+[submodule "themes/Fan"]
+	path = themes/Fan
+	url = https://github.com/fan-lv/Fan.git
+[submodule "themes/3-hexo"]
+	path = themes/3-hexo
+	url = https://github.com/yelog/hexo-theme-3-hexo.git
