@@ -45,7 +45,7 @@
 </head>
 <div style="display: none">
   <input class="theme_disqus_on" value="false">
-  <input class="theme_preload_comment" value="false">
+  <input class="theme_preload_comment" value="tfalserue">
 </div>
 <body>
 <aside class="nav">
@@ -227,6 +227,17 @@
         </span>
         
         
+        <span class="top-comment" title="跳转至评论区">
+            <a href="#comments">
+                评论:<span class="count-comment">
+                    <span class="spinner">
+                      <div class="cube1"></div>
+                      <div class="cube2"></div>
+                    </span>
+                </span>
+            </a>
+        </span>
+        
     </div>
     
     <div class="toc-ref">
@@ -259,6 +270,26 @@
 </p>
 
 
+
+    <div id="comments"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+<script type="text/javascript">
+    $.getScript('https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', function () {
+        var gitalk = new Gitalk({
+            clientID: '39ce50aafebf22ff500c',
+            clientSecret: '4a379daf0cbc4a6cd3e2427ddcfa638b4e03270b',
+            repo: 'my-gittalk',
+            owner: 'wzslw',
+            admin: ['wzslw'],
+            id: location.pathname,
+            distractionFreeMode: 'true',
+            language: 'zh-CN',
+            perPage: parseInt('10',10)
+        })
+        gitalk.render('comments')
+    })
+</script>
 
 
 
