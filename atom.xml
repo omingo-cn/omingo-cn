@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://sylarlove.coding.me/"/>
-  <updated>2019-05-07T06:07:43.724Z</updated>
+  <updated>2019-05-07T09:12:45.582Z</updated>
   <id>https://sylarlove.coding.me/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>非spring-cloud项目增加hystrix监控</title>
+    <link href="https://sylarlove.coding.me/2019/05/07/%E9%9D%9Espring-cloud%E9%A1%B9%E7%9B%AE%E5%A2%9E%E5%8A%A0hystrix%E7%9B%91%E6%8E%A7/"/>
+    <id>https://sylarlove.coding.me/2019/05/07/非spring-cloud项目增加hystrix监控/</id>
+    <published>2019-05-07T09:11:30.000Z</published>
+    <updated>2019-05-07T09:12:45.582Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="增加依赖"><a href="#增加依赖" class="headerlink" title="增加依赖"></a>增加依赖</h2><p>pom文件中</p><pre><code class="xml"> &lt;dependency&gt;  &lt;groupId&gt;com.netflix.hystrix&lt;/groupId&gt;  &lt;artifactId&gt;hystrix-metrics-event-stream&lt;/artifactId&gt;  &lt;version&gt;${hystrix.version}&lt;/version&gt; &lt;/dependency&gt;</code></pre><h2 id="添加servlet"><a href="#添加servlet" class="headerlink" title="添加servlet"></a>添加servlet</h2><p>web.xml 中</p><pre><code class="xml">  &lt;servlet&gt;    &lt;display-name&gt;HystrixMetricsStreamServlet&lt;/display-name&gt;    &lt;servlet-name&gt;HystrixMetricsStreamServlet&lt;/servlet-name&gt;    &lt;servlet-class&gt;com.netflix.hystrix.contrib.metrics.eventstream.HystrixMetricsStreamServlet    &lt;/servlet-class&gt;  &lt;/servlet&gt;  &lt;servlet-mapping&gt;    &lt;servlet-name&gt;HystrixMetricsStreamServlet&lt;/servlet-name&gt;    &lt;url-pattern&gt;/hystrix.stream&lt;/url-pattern&gt;  &lt;/servlet-mapping&gt;</code></pre><h2 id="增加Basic安全认证"><a href="#增加Basic安全认证" class="headerlink" title="增加Basic安全认证"></a>增加Basic安全认证</h2><p>web.xml 中</p><pre><code class="xml">&lt;filter&gt;    &lt;filter-name&gt;basicAuthenticationFilter&lt;/filter-name&gt;    &lt;filter-class&gt;com.dapeng.cloud.support.web.BasicAuthenticationFilter&lt;/filter-class&gt;    &lt;init-param&gt;      &lt;param-name&gt;username&lt;/param-name&gt;      &lt;param-value&gt;xxxx&lt;/param-value&gt;    &lt;/init-param&gt;    &lt;init-param&gt;      &lt;param-name&gt;password&lt;/param-name&gt;      &lt;param-value&gt;xxxx&lt;/param-value&gt;    &lt;/init-param&gt;  &lt;/filter&gt;  &lt;filter-mapping&gt;    &lt;filter-name&gt;basicAuthenticationFilter&lt;/filter-name&gt;    &lt;servlet-name&gt;HystrixMetricsStreamServlet&lt;/servlet-name&gt;  &lt;/filter-mapping&gt;</code></pre><p><code>BasicAuthenticationFilter</code> 源码:</p><pre><code class="java">package com.dapeng.cloud.support.web;import java.io.IOException;import java.io.UnsupportedEncodingException;import java.util.StringTokenizer;import javax.servlet.Filter;import javax.servlet.FilterChain;import javax.servlet.FilterConfig;import javax.servlet.ServletException;import javax.servlet.ServletRequest;import javax.servlet.ServletResponse;import javax.servlet.http.HttpServletRequest;import javax.servlet.http.HttpServletResponse;import org.apache.commons.codec.binary.Base64;import org.slf4j.Logger;import org.slf4j.LoggerFactory;import org.springframework.util.StringUtils;public class BasicAuthenticationFilter implements Filter {  private static final Logger LOGGER = LoggerFactory.getLogger(BasicAuthenticationFilter.class);  private String username = &quot;&quot;;  private String password = &quot;&quot;;  private String realm = &quot;Protected&quot;;  public BasicAuthenticationFilter() {  }  public void init(FilterConfig filterConfig) throws ServletException {    this.username = filterConfig.getInitParameter(&quot;username&quot;);    this.password = filterConfig.getInitParameter(&quot;password&quot;);    String paramRealm = filterConfig.getInitParameter(&quot;realm&quot;);    if (StringUtils.hasText(paramRealm)) {      this.realm = paramRealm;    }  }  public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {    HttpServletRequest request = (HttpServletRequest)servletRequest;    HttpServletResponse response = (HttpServletResponse)servletResponse;    String authHeader = request.getHeader(&quot;Authorization&quot;);    if (authHeader != null) {      StringTokenizer st = new StringTokenizer(authHeader);      if (st.hasMoreTokens()) {        String basic = st.nextToken();        if (basic.equalsIgnoreCase(&quot;Basic&quot;)) {          try {            String credentials = new String(Base64.decodeBase64(st.nextToken()), &quot;UTF-8&quot;);            LOGGER.debug(&quot;Credentials: &quot; + credentials);            int p = credentials.indexOf(&quot;:&quot;);            if (p != -1) {              String _username = credentials.substring(0, p).trim();              String _password = credentials.substring(p + 1).trim();              if (this.username.equals(_username) &amp;&amp; this.password.equals(_password)) {                filterChain.doFilter(servletRequest, servletResponse);              } else {                this.unauthorized(response, &quot;Bad credentials&quot;);              }            } else {              this.unauthorized(response, &quot;Invalid authentication token&quot;);            }          } catch (UnsupportedEncodingException var13) {            throw new Error(&quot;Couldn&#39;t retrieve authentication&quot;, var13);          }        }      }    } else {      this.unauthorized(response);    }  }  public void destroy() {  }  private void unauthorized(HttpServletResponse response, String message) throws IOException {    response.setHeader(&quot;WWW-Authenticate&quot;, &quot;Basic realm=\&quot;&quot; + this.realm + &quot;\&quot;&quot;);    response.sendError(401, message);  }  private void unauthorized(HttpServletResponse response) throws IOException {    this.unauthorized(response, &quot;Unauthorized&quot;);  }}</code></pre>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h2 id=&quot;增加依赖&quot;&gt;&lt;a href=&quot;#增加依赖&quot; class=&quot;headerlink&quot; title=&quot;增加依赖&quot;&gt;&lt;/a&gt;增加依赖&lt;/h2&gt;&lt;p&gt;pom文件中&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;xml&quot;&gt; &amp;lt;dependency&amp;gt;
+  &amp;lt;gr
+      
+    
+    </summary>
+    
+    
+      <category term="hystrix" scheme="https://sylarlove.coding.me/tags/hystrix/"/>
+    
+  </entry>
   
   <entry>
     <title>Hello World</title>

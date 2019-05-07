@@ -2,9 +2,9 @@
 <html>
 <head><meta name="generator" content="Hexo 3.8.0">
   <meta charset="utf-8">
-  <title>Hello World | 猿明园</title>
-  <meta name="keywords" content>
-  <meta name="description" content="Hello World | 猿明园">
+  <title>非spring-cloud项目增加hystrix监控 | 猿明园</title>
+  <meta name="keywords" content=" hystrix ">
+  <meta name="description" content="非spring-cloud项目增加hystrix监控 | 猿明园">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="description" content="页面未找到！">
 <meta property="og:type" content="website">
@@ -206,24 +206,30 @@
 </aside>
 <div class="post">
     <div class="pjax">
-        <article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-非spring-cloud项目增加hystrix监控" class="article article-type-post" itemscope itemprop="blogPost">
     
-        <h1 class="article-title">Hello World</h1>
+        <h1 class="article-title">非spring-cloud项目增加hystrix监控</h1>
     
     <div class="article-meta">
         
         
         
+        
+        <span class="tag">
+            
+            <a href="javascript:" class="color3">hystrix</a>
+            
+        </span>
         
     </div>
     <div class="article-meta">
         
-        创建时间:<time class="date" title="更新时间: 2019-05-07 14:07:43">2019-05-07 14:07</time>
+        创建时间:<time class="date" title="更新时间: 2019-05-07 17:12:45">2019-05-07 17:11</time>
         
     </div>
     <div class="article-meta">
         
-        <span>字数:78</span>
+        <span>字数:555</span>
         
         
         <span id="busuanzi_container_page_pv">
@@ -253,7 +259,7 @@
     
     <div class="toc-ref">
     
-        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Quick-Start"><span class="toc-text">Quick Start</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Create-a-new-post"><span class="toc-text">Create a new post</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Run-server"><span class="toc-text">Run server</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Generate-static-files"><span class="toc-text">Generate static files</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Deploy-to-remote-sites"><span class="toc-text">Deploy to remote sites</span></a></li></ol></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#增加依赖"><span class="toc-text">增加依赖</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#添加servlet"><span class="toc-text">添加servlet</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#增加Basic安全认证"><span class="toc-text">增加Basic安全认证</span></a></li></ol>
     
 <style>
     .left-col .switch-btn,
@@ -268,21 +274,130 @@
 </div>
     <div class="article-entry" itemprop="articleBody">
       
-        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><pre><code class="bash">$ hexo new &quot;My New Post&quot;
+        <h2 id="增加依赖"><a href="#增加依赖" class="headerlink" title="增加依赖"></a>增加依赖</h2><p>pom文件中</p>
+<pre><code class="xml"> &lt;dependency&gt;
+  &lt;groupId&gt;com.netflix.hystrix&lt;/groupId&gt;
+  &lt;artifactId&gt;hystrix-metrics-event-stream&lt;/artifactId&gt;
+  &lt;version&gt;${hystrix.version}&lt;/version&gt;
+ &lt;/dependency&gt;
 </code></pre>
-<pre><code class="javascript">console.log(1)
+<h2 id="添加servlet"><a href="#添加servlet" class="headerlink" title="添加servlet"></a>添加servlet</h2><p>web.xml 中</p>
+<pre><code class="xml">  &lt;servlet&gt;
+    &lt;display-name&gt;HystrixMetricsStreamServlet&lt;/display-name&gt;
+    &lt;servlet-name&gt;HystrixMetricsStreamServlet&lt;/servlet-name&gt;
+    &lt;servlet-class&gt;com.netflix.hystrix.contrib.metrics.eventstream.HystrixMetricsStreamServlet
+    &lt;/servlet-class&gt;
+  &lt;/servlet&gt;
+  &lt;servlet-mapping&gt;
+    &lt;servlet-name&gt;HystrixMetricsStreamServlet&lt;/servlet-name&gt;
+    &lt;url-pattern&gt;/hystrix.stream&lt;/url-pattern&gt;
+  &lt;/servlet-mapping&gt;
 </code></pre>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><pre><code class="bash">$ hexo server
+<h2 id="增加Basic安全认证"><a href="#增加Basic安全认证" class="headerlink" title="增加Basic安全认证"></a>增加Basic安全认证</h2><p>web.xml 中</p>
+<pre><code class="xml">&lt;filter&gt;
+    &lt;filter-name&gt;basicAuthenticationFilter&lt;/filter-name&gt;
+    &lt;filter-class&gt;com.dapeng.cloud.support.web.BasicAuthenticationFilter&lt;/filter-class&gt;
+    &lt;init-param&gt;
+      &lt;param-name&gt;username&lt;/param-name&gt;
+      &lt;param-value&gt;xxxx&lt;/param-value&gt;
+    &lt;/init-param&gt;
+    &lt;init-param&gt;
+      &lt;param-name&gt;password&lt;/param-name&gt;
+      &lt;param-value&gt;xxxx&lt;/param-value&gt;
+    &lt;/init-param&gt;
+  &lt;/filter&gt;
+  &lt;filter-mapping&gt;
+    &lt;filter-name&gt;basicAuthenticationFilter&lt;/filter-name&gt;
+    &lt;servlet-name&gt;HystrixMetricsStreamServlet&lt;/servlet-name&gt;
+  &lt;/filter-mapping&gt;
 </code></pre>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><pre><code class="bash">$ hexo generate
+<p><code>BasicAuthenticationFilter</code> 源码:</p>
+<pre><code class="java">package com.dapeng.cloud.support.web;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.StringTokenizer;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.codec.binary.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
+
+public class BasicAuthenticationFilter implements Filter {
+  private static final Logger LOGGER = LoggerFactory.getLogger(BasicAuthenticationFilter.class);
+  private String username = &quot;&quot;;
+  private String password = &quot;&quot;;
+  private String realm = &quot;Protected&quot;;
+
+  public BasicAuthenticationFilter() {
+  }
+
+  public void init(FilterConfig filterConfig) throws ServletException {
+    this.username = filterConfig.getInitParameter(&quot;username&quot;);
+    this.password = filterConfig.getInitParameter(&quot;password&quot;);
+    String paramRealm = filterConfig.getInitParameter(&quot;realm&quot;);
+    if (StringUtils.hasText(paramRealm)) {
+      this.realm = paramRealm;
+    }
+
+  }
+
+  public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+    HttpServletRequest request = (HttpServletRequest)servletRequest;
+    HttpServletResponse response = (HttpServletResponse)servletResponse;
+    String authHeader = request.getHeader(&quot;Authorization&quot;);
+    if (authHeader != null) {
+      StringTokenizer st = new StringTokenizer(authHeader);
+      if (st.hasMoreTokens()) {
+        String basic = st.nextToken();
+        if (basic.equalsIgnoreCase(&quot;Basic&quot;)) {
+          try {
+            String credentials = new String(Base64.decodeBase64(st.nextToken()), &quot;UTF-8&quot;);
+            LOGGER.debug(&quot;Credentials: &quot; + credentials);
+            int p = credentials.indexOf(&quot;:&quot;);
+            if (p != -1) {
+              String _username = credentials.substring(0, p).trim();
+              String _password = credentials.substring(p + 1).trim();
+              if (this.username.equals(_username) &amp;&amp; this.password.equals(_password)) {
+                filterChain.doFilter(servletRequest, servletResponse);
+              } else {
+                this.unauthorized(response, &quot;Bad credentials&quot;);
+              }
+            } else {
+              this.unauthorized(response, &quot;Invalid authentication token&quot;);
+            }
+          } catch (UnsupportedEncodingException var13) {
+            throw new Error(&quot;Couldn&#39;t retrieve authentication&quot;, var13);
+          }
+        }
+      }
+    } else {
+      this.unauthorized(response);
+    }
+
+  }
+
+  public void destroy() {
+  }
+
+  private void unauthorized(HttpServletResponse response, String message) throws IOException {
+    response.setHeader(&quot;WWW-Authenticate&quot;, &quot;Basic realm=\&quot;&quot; + this.realm + &quot;\&quot;&quot;);
+    response.sendError(401, message);
+  }
+
+  private void unauthorized(HttpServletResponse response) throws IOException {
+    this.unauthorized(response, &quot;Unauthorized&quot;);
+  }
+}
+
 </code></pre>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><pre><code class="bash">$ hexo deploy
-</code></pre>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>
 
       
        <hr><span style="font-style: italic;color: gray;"> 转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。可以在下面评论区评论，也可以邮件至 wzslw@163.com </span>
@@ -296,12 +411,12 @@
 
 
 <div class="article_copyright">
-    <p><span>文章标题:</span>Hello World</p>
-    <p><span>文章字数:</span><span class="post-count">78</span></p>
+    <p><span>文章标题:</span>非spring-cloud项目增加hystrix监控</p>
+    <p><span>文章字数:</span><span class="post-count">555</span></p>
     <p><span>本文作者:</span><a href="javascript:void(0)" title="武继明">武继明</a></p>
-    <p><span>发布时间:</span>2019-05-07, 14:07:43</p>
-    <p><span>最后更新:</span>2019-05-07, 14:07:43</p>
-    <span>原始链接:</span><a class="post-url" href="/2019/05/07/hello-world/" title="Hello World">https://sylarlove.coding.me/2019/05/07/hello-world/</a>
+    <p><span>发布时间:</span>2019-05-07, 17:11:30</p>
+    <p><span>最后更新:</span>2019-05-07, 17:12:45</p>
+    <span>原始链接:</span><a class="post-url" href="/2019/05/07/非spring-cloud项目增加hystrix监控/" title="非spring-cloud项目增加hystrix监控">https://sylarlove.coding.me/2019/05/07/非spring-cloud项目增加hystrix监控/</a>
     <p>
         <span>版权声明:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target="_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
     </p>
