@@ -2,9 +2,9 @@
 <html>
 <head><meta name="generator" content="Hexo 3.8.0">
   <meta charset="utf-8">
-  <title>404 | 猿明园</title>
-  <meta name="keywords" content>
-  <meta name="description" content="404 | 猿明园">
+  <title>spring-data-jpa进阶用法之QueryDSL | 猿明园</title>
+  <meta name="keywords" content=" qdsl , jpa ">
+  <meta name="description" content="spring-data-jpa进阶用法之QueryDSL | 猿明园">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="description" content="页面未找到！">
 <meta property="og:type" content="website">
@@ -236,24 +236,38 @@
 </aside>
 <div class="post">
     <div class="pjax">
-        <article id="page-" class="article article-type-page" itemscope itemprop="blogPost">
+        <article id="post-spring-data-jpa进阶用法之QueryDSL" class="article article-type-post" itemscope itemprop="blogPost">
     
-        <h1 class="article-title">404</h1>
+        <h1 class="article-title">spring-data-jpa进阶用法之QueryDSL</h1>
     
     <div class="article-meta">
         
         
         
+        <span class="book">
+            
+            <a href="javascript:" data-rel="jpa">jpa</a>
+            
+        </span>
+        
+        
+        <span class="tag">
+            
+            <a href="javascript:" class="color5">qdsl</a>
+            
+            <a href="javascript:" class="color4">jpa</a>
+            
+        </span>
         
     </div>
     <div class="article-meta">
         
-        创建时间:<time class="date" title="更新时间: 2019-05-07 17:18:11">2019-05-07 17:07</time>
+        创建时间:<time class="date" title="更新时间: 2019-05-08 09:10:11">2019-05-07 23:16</time>
         
     </div>
     <div class="article-meta">
         
-        <span>字数:5</span>
+        <span>字数:433</span>
         
         
         <span id="busuanzi_container_page_pv">
@@ -283,7 +297,7 @@
     
     <div class="toc-ref">
     
-        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#页面未找到！"><span class="toc-text">页面未找到！</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#QueryDSL"><span class="toc-text">QueryDSL</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#spring-data-jpa的支持"><span class="toc-text">spring-data-jpa的支持</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#自定义绑定关系"><span class="toc-text">自定义绑定关系</span></a></li></ol>
     
 <style>
     .left-col .switch-btn,
@@ -298,8 +312,55 @@
 </div>
     <div class="article-entry" itemprop="articleBody">
       
-        <hr>
-<h2 id="页面未找到！"><a href="#页面未找到！" class="headerlink" title="页面未找到！"></a>页面未找到！</h2>
+        <p>很多列表查询接口都会有很多复杂的过滤条件。一般都会在controller里面各种拼接条件然后在持久层写好多针对性的查询接口，导致代码可读性差，实现不够优雅。</p>
+<h3 id="QueryDSL"><a href="#QueryDSL" class="headerlink" title="QueryDSL"></a>QueryDSL</h3><p>其实QueryDsl可以很优雅的解决上述场景遇到的问题，QueryDSL是一个Java语言编写的通用查询框架。spring-data-jpa对QueryDsl提供了良好的支持。同时spring-data-jpa也针对web做了一些扩展支持。具体可以参考<a href="https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#core.extensions.querydsl" target="_blank" rel="noopener">spring-data-jpa的官方文档</a>。</p>
+<h3 id="spring-data-jpa的支持"><a href="#spring-data-jpa的支持" class="headerlink" title="spring-data-jpa的支持"></a>spring-data-jpa的支持</h3><p>持久层repository继承<code>QuerydslPredicateExecutor</code>，即可使用QueryDsl查询。</p>
+<pre><code class="java">interface UserRepository extends CrudRepository&lt;User, Long&gt;, QuerydslPredicateExecutor&lt;User&gt; {
+}
+
+Predicate predicate = user.firstname.equalsIgnoreCase(&quot;dave&quot;)
+    .and(user.lastname.startsWithIgnoreCase(&quot;mathews&quot;));
+
+userRepository.findAll(predicate);
+</code></pre>
+<p>web层可以使用 @QuerydslPredicate 标注Predicate。</p>
+<pre><code class="java">@Controller
+class UserController {
+
+  @Autowired UserRepository repository;
+
+  @RequestMapping(value = &quot;/&quot;, method = RequestMethod.GET)
+  String index(Model model, @QuerydslPredicate(root = User.class) Predicate predicate,    
+          Pageable pageable, @RequestParam MultiValueMap&lt;String, String&gt; parameters) {
+
+    model.addAttribute(&quot;users&quot;, repository.findAll(predicate, pageable));
+
+    return &quot;index&quot;;
+  }
+}
+</code></pre>
+<p>这样包含 ?firstname=Dave&amp;lastname=Matthews的查询将会被<code>QuerydslPredicateArgumentResolver</code>解析成 <code>QUser.user.firstname.eq(&quot;Dave&quot;).and(QUser.user.lastname.eq(&quot;Matthews&quot;))</code></p>
+<p>有时候我们的参数并不是和实体的属性一一对应，甚至我们需要隐藏一些不可以用来查询的属性。</p>
+<h3 id="自定义绑定关系"><a href="#自定义绑定关系" class="headerlink" title="自定义绑定关系"></a>自定义绑定关系</h3><p>我们可一通过实现 <code>QuerydslBinderCustomizer</code>这个接口来自定义参数的绑定关系。</p>
+<pre><code class="java">CustomUserQuerydslBinder implements QuerydslBinderCustomizer&lt;QUser&gt; {
+    @Override
+    public void customize(QuerydslBindings querydslBindings, QUser qUser) {
+      //自定义绑定关系
+      querydslBindings.excludeUnlistedProperties(true);//使用白名单模式
+      querydslBindings.including( //设置属性白名单
+            qUser.id,
+            qUser.name
+      );
+      //自定义参数的绑定
+       querydslBindings.bind(Expressions.stringPath(&quot;sex&quot;)).as(&quot;type&quot;).first((path,value)-&gt;
+            path.eq(value)
+        );
+    }
+}
+
+</code></pre>
+<p>然后在 <code>@QuerydslPredicate(bindings=CustomUserQuerydslBinder.class,root=User.class)</code>中指定。</p>
+
       
        <hr><span style="font-style: italic;color: gray;"> 转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。可以在下面评论区评论，也可以邮件至 wzslw@163.com </span>
     </div>
@@ -311,6 +372,38 @@
 </p>
 
 
+<div class="article_copyright">
+    <p><span>文章标题:</span>spring-data-jpa进阶用法之QueryDSL</p>
+    <p><span>文章字数:</span><span class="post-count">433</span></p>
+    <p><span>本文作者:</span><a href="javascript:void(0)" title="武继明">武继明</a></p>
+    <p><span>发布时间:</span>2019-05-07, 23:16:24</p>
+    <p><span>最后更新:</span>2019-05-08, 09:10:11</p>
+    <span>原始链接:</span><a class="post-url" href="/2019/05/07/spring-data-jpa进阶用法之QueryDSL/" title="spring-data-jpa进阶用法之QueryDSL">https://www.omingo.com/2019/05/07/spring-data-jpa进阶用法之QueryDSL/</a>
+    <p>
+        <span>版权声明:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target="_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+    </p>
+</div>
+
+
+    <div id="comments"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+<script type="text/javascript">
+    $.getScript('https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', function () {
+        var gitalk = new Gitalk({
+            clientID: '39ce50aafebf22ff500c',
+            clientSecret: '4a379daf0cbc4a6cd3e2427ddcfa638b4e03270b',
+            repo: 'my-gittalk',
+            owner: 'wzslw',
+            admin: ['wzslw'],
+            id: location.pathname,
+            distractionFreeMode: 'true',
+            language: 'zh-CN',
+            perPage: parseInt('10',10)
+        })
+        gitalk.render('comments')
+    })
+</script>
 
 
 

@@ -5,9 +5,9 @@
   <subtitle>笨鸟先飞，天道酬勤。</subtitle>
   <link href="/atom.xml" rel="self"/>
   
-  <link href="https://sylarlove.coding.me/"/>
-  <updated>2019-05-07T09:12:45.582Z</updated>
-  <id>https://sylarlove.coding.me/</id>
+  <link href="https://www.omingo.com/"/>
+  <updated>2019-05-09T07:36:28.465Z</updated>
+  <id>https://www.omingo.com/</id>
   
   <author>
     <name>武继明</name>
@@ -17,9 +17,63 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>微服务不停服升级</title>
+    <link href="https://www.omingo.com/2019/05/09/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E4%B8%8D%E5%81%9C%E6%9C%8D%E5%8D%87%E7%BA%A7/"/>
+    <id>https://www.omingo.com/2019/05/09/微服务不停服升级/</id>
+    <published>2019-05-09T06:41:32.000Z</published>
+    <updated>2019-05-09T07:36:28.465Z</updated>
+    
+    <content type="html"><![CDATA[<p>有时候我们会给生产环境修复一些比较严重的bug,有没有一种操作可以不停服进行系统升级呢?<br>答案是: <strong>有的</strong>.</p><h2 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h2><p>生产环境部署在阿里云acs-swarm上.<br>服务注册使用eureka.</p><h2 id="原理分析"><a href="#原理分析" class="headerlink" title="原理分析"></a>原理分析</h2><p>首先新增新版本的服务实例到生产环境,待新版本服务开始服务之后,通知注册中心下线老版本服务(此时老版本服务不停机,还可以提供服务,只是不会在收到新的请求了),观察监控 等待老版本服务处理完所有请求之后,停机老版本服务,至此完成不停服升级.<br>原理挺简单,关键看操作.</p><h2 id="具体操作"><a href="#具体操作" class="headerlink" title="具体操作"></a>具体操作</h2><ol><li><p>打包要升级的服务,并推送到阿里云镜像服务.</p></li><li><p>进入阿里云后台容器服务,选择服务所在集群,选择相应的应用 点变更配置.<br>找到相应的服务,修改一下服务名称,比如 user-service 修改成 user-service-1,在修改一下服务镜像的版本号,还有acs应用的版本号.<br><strong>注意发布类型要选蓝绿发布</strong></p><img src="/2019/05/09/微服务不停服升级/1.png"><p>确定之后稍等片刻,你会发现,你的容器服务列表新增了一个user-service-1的服务. eureka服务器上user-service的实例也多了一个.</p></li><li><p>通知注册中心下线老版本服务</p><pre><code class="bash">curl -X PUT http://eureka-server:8761/eureka/app/{SERVICE-NAME}/{SERVICE-ID}/status?value=OUT_OF_SERVICE</code></pre><p>把{}中的内容替换成实际内容.<br>你会发现eureka会给这个实例标记一个 红色的 OUT_OF_SERVICE,这样eureka client就不会获取到这个实例的注册信息了,网关也不会讲流量转发到这个实例上来了.</p></li><li><p>看监控下线老版本服务.<br>你会发现老服务的流量会越来越少.</p><img src="/2019/05/09/微服务不停服升级/2.png"><p>当老服务处理完所有请求的时候,到阿里云acs控制台,选择确认发布.</p></li></ol><p>搞定,收工.</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;有时候我们会给生产环境修复一些比较严重的bug,有没有一种操作可以不停服进行系统升级呢?&lt;br&gt;答案是: &lt;strong&gt;有的&lt;/strong&gt;.&lt;/p&gt;
+&lt;h2 id=&quot;环境&quot;&gt;&lt;a href=&quot;#环境&quot; class=&quot;headerlink&quot; title=&quot;环境&quot;&gt;&lt;/a
+      
+    
+    </summary>
+    
+      <category term="微服务" scheme="https://www.omingo.com/categories/%E5%BE%AE%E6%9C%8D%E5%8A%A1/"/>
+    
+    
+      <category term="升级" scheme="https://www.omingo.com/tags/%E5%8D%87%E7%BA%A7/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>spring-data-jpa进阶用法之QueryDSL</title>
+    <link href="https://www.omingo.com/2019/05/07/spring-data-jpa%E8%BF%9B%E9%98%B6%E7%94%A8%E6%B3%95%E4%B9%8BQueryDSL/"/>
+    <id>https://www.omingo.com/2019/05/07/spring-data-jpa进阶用法之QueryDSL/</id>
+    <published>2019-05-07T15:16:24.000Z</published>
+    <updated>2019-05-08T01:10:11.942Z</updated>
+    
+    <content type="html"><![CDATA[<p>很多列表查询接口都会有很多复杂的过滤条件。一般都会在controller里面各种拼接条件然后在持久层写好多针对性的查询接口，导致代码可读性差，实现不够优雅。</p><h3 id="QueryDSL"><a href="#QueryDSL" class="headerlink" title="QueryDSL"></a>QueryDSL</h3><p>其实QueryDsl可以很优雅的解决上述场景遇到的问题，QueryDSL是一个Java语言编写的通用查询框架。spring-data-jpa对QueryDsl提供了良好的支持。同时spring-data-jpa也针对web做了一些扩展支持。具体可以参考<a href="https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#core.extensions.querydsl" target="_blank" rel="noopener">spring-data-jpa的官方文档</a>。</p><h3 id="spring-data-jpa的支持"><a href="#spring-data-jpa的支持" class="headerlink" title="spring-data-jpa的支持"></a>spring-data-jpa的支持</h3><p>持久层repository继承<code>QuerydslPredicateExecutor</code>，即可使用QueryDsl查询。</p><pre><code class="java">interface UserRepository extends CrudRepository&lt;User, Long&gt;, QuerydslPredicateExecutor&lt;User&gt; {}Predicate predicate = user.firstname.equalsIgnoreCase(&quot;dave&quot;)    .and(user.lastname.startsWithIgnoreCase(&quot;mathews&quot;));userRepository.findAll(predicate);</code></pre><p>web层可以使用 @QuerydslPredicate 标注Predicate。</p><pre><code class="java">@Controllerclass UserController {  @Autowired UserRepository repository;  @RequestMapping(value = &quot;/&quot;, method = RequestMethod.GET)  String index(Model model, @QuerydslPredicate(root = User.class) Predicate predicate,              Pageable pageable, @RequestParam MultiValueMap&lt;String, String&gt; parameters) {    model.addAttribute(&quot;users&quot;, repository.findAll(predicate, pageable));    return &quot;index&quot;;  }}</code></pre><p>这样包含 ?firstname=Dave&amp;lastname=Matthews的查询将会被<code>QuerydslPredicateArgumentResolver</code>解析成 <code>QUser.user.firstname.eq(&quot;Dave&quot;).and(QUser.user.lastname.eq(&quot;Matthews&quot;))</code></p><p>有时候我们的参数并不是和实体的属性一一对应，甚至我们需要隐藏一些不可以用来查询的属性。</p><h3 id="自定义绑定关系"><a href="#自定义绑定关系" class="headerlink" title="自定义绑定关系"></a>自定义绑定关系</h3><p>我们可一通过实现 <code>QuerydslBinderCustomizer</code>这个接口来自定义参数的绑定关系。</p><pre><code class="java">CustomUserQuerydslBinder implements QuerydslBinderCustomizer&lt;QUser&gt; {    @Override    public void customize(QuerydslBindings querydslBindings, QUser qUser) {      //自定义绑定关系      querydslBindings.excludeUnlistedProperties(true);//使用白名单模式      querydslBindings.including( //设置属性白名单            qUser.id,            qUser.name      );      //自定义参数的绑定       querydslBindings.bind(Expressions.stringPath(&quot;sex&quot;)).as(&quot;type&quot;).first((path,value)-&gt;            path.eq(value)        );    }}</code></pre><p>然后在 <code>@QuerydslPredicate(bindings=CustomUserQuerydslBinder.class,root=User.class)</code>中指定。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;很多列表查询接口都会有很多复杂的过滤条件。一般都会在controller里面各种拼接条件然后在持久层写好多针对性的查询接口，导致代码可读性差，实现不够优雅。&lt;/p&gt;
+&lt;h3 id=&quot;QueryDSL&quot;&gt;&lt;a href=&quot;#QueryDSL&quot; class=&quot;headerlin
+      
+    
+    </summary>
+    
+      <category term="jpa" scheme="https://www.omingo.com/categories/jpa/"/>
+    
+    
+      <category term="qdsl" scheme="https://www.omingo.com/tags/qdsl/"/>
+    
+      <category term="jpa" scheme="https://www.omingo.com/tags/jpa/"/>
+    
+  </entry>
+  
+  <entry>
     <title>非spring-cloud项目增加hystrix监控</title>
-    <link href="https://sylarlove.coding.me/2019/05/07/%E9%9D%9Espring-cloud%E9%A1%B9%E7%9B%AE%E5%A2%9E%E5%8A%A0hystrix%E7%9B%91%E6%8E%A7/"/>
-    <id>https://sylarlove.coding.me/2019/05/07/非spring-cloud项目增加hystrix监控/</id>
+    <link href="https://www.omingo.com/2019/05/07/%E9%9D%9Espring-cloud%E9%A1%B9%E7%9B%AE%E5%A2%9E%E5%8A%A0hystrix%E7%9B%91%E6%8E%A7/"/>
+    <id>https://www.omingo.com/2019/05/07/非spring-cloud项目增加hystrix监控/</id>
     <published>2019-05-07T09:11:30.000Z</published>
     <updated>2019-05-07T09:12:45.582Z</updated>
     
@@ -37,14 +91,14 @@
     </summary>
     
     
-      <category term="hystrix" scheme="https://sylarlove.coding.me/tags/hystrix/"/>
+      <category term="hystrix" scheme="https://www.omingo.com/tags/hystrix/"/>
     
   </entry>
   
   <entry>
     <title>Hello World</title>
-    <link href="https://sylarlove.coding.me/2019/05/07/hello-world/"/>
-    <id>https://sylarlove.coding.me/2019/05/07/hello-world/</id>
+    <link href="https://www.omingo.com/2019/05/07/hello-world/"/>
+    <id>https://www.omingo.com/2019/05/07/hello-world/</id>
     <published>2019-05-07T06:07:43.724Z</published>
     <updated>2019-05-07T06:07:43.724Z</updated>
     
@@ -64,8 +118,8 @@
   
   <entry>
     <title>本博客快捷键说明</title>
-    <link href="https://sylarlove.coding.me/2019/05/07/%E6%9C%AC%E5%8D%9A%E5%AE%A2%E5%BF%AB%E6%8D%B7%E9%94%AE%E8%AF%B4%E6%98%8E/"/>
-    <id>https://sylarlove.coding.me/2019/05/07/本博客快捷键说明/</id>
+    <link href="https://www.omingo.com/2019/05/07/%E6%9C%AC%E5%8D%9A%E5%AE%A2%E5%BF%AB%E6%8D%B7%E9%94%AE%E8%AF%B4%E6%98%8E/"/>
+    <id>https://www.omingo.com/2019/05/07/本博客快捷键说明/</id>
     <published>2019-05-07T02:51:36.000Z</published>
     <updated>2019-05-07T02:54:51.254Z</updated>
     
@@ -82,7 +136,7 @@
     </summary>
     
     
-      <category term="快捷键" scheme="https://sylarlove.coding.me/tags/%E5%BF%AB%E6%8D%B7%E9%94%AE/"/>
+      <category term="快捷键" scheme="https://www.omingo.com/tags/%E5%BF%AB%E6%8D%B7%E9%94%AE/"/>
     
   </entry>
   
