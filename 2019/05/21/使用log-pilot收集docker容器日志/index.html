@@ -2,9 +2,9 @@
 <html>
 <head><meta name="generator" content="Hexo 3.8.0">
   <meta charset="utf-8">
-  <title>微服务不停服升级 | 猿明园</title>
-  <meta name="keywords" content=" 升级 ">
-  <meta name="description" content="微服务不停服升级 | 猿明园">
+  <title>使用log-pilot收集docker容器日志 | 猿明园</title>
+  <meta name="keywords" content=" 日志 ">
+  <meta name="description" content="使用log-pilot收集docker容器日志 | 猿明园">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="description" content="页面未找到！">
 <meta property="og:type" content="website">
@@ -256,36 +256,30 @@
 </aside>
 <div class="post">
     <div class="pjax">
-        <article id="post-微服务不停服升级" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-使用log-pilot收集docker容器日志" class="article article-type-post" itemscope itemprop="blogPost">
     
-        <h1 class="article-title">微服务不停服升级</h1>
+        <h1 class="article-title">使用log-pilot收集docker容器日志</h1>
     
     <div class="article-meta">
         
         
-        
-        <span class="book">
-            
-            <a href="javascript:" data-rel="微服务">微服务</a>
-            
-        </span>
         
         
         <span class="tag">
             
-            <a href="javascript:" class="color3">升级</a>
+            <a href="javascript:" class="color3">日志</a>
             
         </span>
         
     </div>
     <div class="article-meta">
         
-        创建时间:<time class="date" title="更新时间: 2019-05-09 15:36:28">2019-05-09 14:41</time>
+        创建时间:<time class="date" title="更新时间: 2019-05-21 17:06:48">2019-05-21 16:25</time>
         
     </div>
     <div class="article-meta">
         
-        <span>字数:501</span>
+        <span>字数:514</span>
         
         
         <span id="busuanzi_container_page_pv">
@@ -304,7 +298,7 @@
     
     <div class="toc-ref">
     
-        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#环境"><span class="toc-text">环境</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#原理分析"><span class="toc-text">原理分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#具体操作"><span class="toc-text">具体操作</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#实践"><span class="toc-text">实践</span></a></li></ol>
     
 <style>
     .left-col .switch-btn,
@@ -319,27 +313,39 @@
 </div>
     <div class="article-entry" itemprop="articleBody">
       
-        <p>有时候我们会给生产环境修复一些比较严重的bug,有没有一种操作可以不停服进行系统升级呢?<br>答案是: <strong>有的</strong>.</p>
-<h2 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h2><p>生产环境部署在阿里云acs-swarm上.<br>服务注册使用eureka.</p>
-<h2 id="原理分析"><a href="#原理分析" class="headerlink" title="原理分析"></a>原理分析</h2><p>首先新增新版本的服务实例到生产环境,待新版本服务开始服务之后,通知注册中心下线老版本服务(此时老版本服务不停机,还可以提供服务,只是不会在收到新的请求了),观察监控 等待老版本服务处理完所有请求之后,停机老版本服务,至此完成不停服升级.<br>原理挺简单,关键看操作.</p>
-<h2 id="具体操作"><a href="#具体操作" class="headerlink" title="具体操作"></a>具体操作</h2><ol>
-<li><p>打包要升级的服务,并推送到阿里云镜像服务.</p>
+        <p>本文档介绍一款新的 Docker 日志收集工具：log-pilot。log-pilot 是阿里云提供的日志收集镜像。我们可以在每台机器上部署一个 log-pilot 实例，就可以收集机器上所有 Docker 应用日志。(注意：只支持Linux版本的Docker，不支持Windows/Mac版)。</p>
+<p>log-pilot 具有如下特性：</p>
+<ul>
+<li>一个单独的 log 进程收集机器上所有容器的日志。不需要为每个容器启动一个 log 进程。</li>
+<li>支持文件日志和 stdout。docker log dirver 亦或 logspout 只能处理 stdout，log-pilot 不仅支持收集 stdout 日志，还可以收集文件日志。</li>
+<li>声明式配置。当您的容器有日志要收集，只要通过 label 声明要收集的日志文件的路径，无需改动其他任何配置，log-pilot 就会自动收集新容器的日志。</li>
+<li>支持多种日志存储方式。无论是强大的阿里云日志服务，还是比较流行的 elasticsearch 组合，甚至是 graylog，log-pilot 都能把日志投递到正确的地点。</li>
+<li><p>开源。log-pilot 完全开源，您可以从 Git项目地址 <a href="https://github.com/AliyunContainerService/log-pilot" target="_blank" rel="noopener">下载代码</a>。如果现有的功能不能满足您的需要，欢迎提 issue。</p>
+<img src="/2019/05/21/使用log-pilot收集docker容器日志/1.png">
 </li>
-<li><p>进入阿里云后台容器服务,选择服务所在集群,选择相应的应用 点变更配置.<br>找到相应的服务,修改一下服务名称,比如 user-service 修改成 user-service-1,在修改一下服务镜像的版本号,还有acs应用的版本号.<br><strong>注意发布类型要选蓝绿发布</strong></p>
-<img src="/2019/05/09/微服务不停服升级/1.png">
-<p>确定之后稍等片刻,你会发现,你的容器服务列表新增了一个user-service-1的服务. eureka服务器上user-service的实例也多了一个.</p>
-</li>
-<li><p>通知注册中心下线老版本服务</p>
-<pre><code class="bash">curl -X PUT http://eureka-server:8761/eureka/app/{SERVICE-NAME}/{SERVICE-ID}/status?value=OUT_OF_SERVICE
-</code></pre>
-<p>把{}中的内容替换成实际内容.<br>你会发现eureka会给这个实例标记一个 红色的 OUT_OF_SERVICE,这样eureka client就不会获取到这个实例的注册信息了,网关也不会讲流量转发到这个实例上来了.</p>
-</li>
-<li><p>看监控下线老版本服务.<br>你会发现老服务的流量会越来越少.</p>
-<img src="/2019/05/09/微服务不停服升级/2.png">
-<p>当老服务处理完所有请求的时候,到阿里云acs控制台,选择确认发布.</p>
-</li>
+</ul>
+<h2 id="实践"><a href="#实践" class="headerlink" title="实践"></a>实践</h2><p>先有应用使用单机docker部署,需要将docker容器产生的日志发送到kafka.</p>
+<p>首先部署log-pilot镜像,用来感知容器日志并发送日志到目的地:</p>
+<pre><code>docker run --name log-pilot -d \
+-v /var/run/docker.sock:/var/run/docker.sock \
+-v /etc/localtime:/etc/localtime \
+-v /:/host:ro \
+--cap-add SYS_ADMIN \
+-e LOGGING_OUTPUT=kafka \ #选择输入类型 kafka
+-e KAFKA_BROKERS=kafka:9092 \ # 配置kafka的地址
+registry.cn-hangzhou.aliyuncs.com/acs/log-pilot:0.9.5-filebeat
+</code></pre><p>运行docker应用的时候只需要增加标签 aliyun.$name.*:<br>如:</p>
+<pre><code>docker run -it --rm -p 10080:8080 \
+-v /usr/local/tomcat/logs \
+--label aliyun.logs.catalina=stdout \ 
+--label aliyun.logs.access=/usr/local/tomcat/logs/localhost_access_log.*.txt \
+tomcat
+</code></pre><p>还可以自定义输入的target:<br>aliyun.$name.target=&lt;target&gt;<br>&lt;target&gt;:自定义字符串,分别指代:</p>
+<ol>
+<li>eleasticsearch-&gt;index</li>
+<li>kafka-&gt;topic</li>
 </ol>
-<p>搞定,收工.</p>
+<p>参考文章:<br><a href="https://yq.aliyun.com/articles/674327" target="_blank" rel="noopener">日志采集利器</a></p>
 
       
        <hr><span style="font-style: italic;color: gray;"> 转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。可以在下面评论区评论，也可以邮件至 wzslw@163.com </span>
@@ -353,12 +359,12 @@
 
 
 <div class="article_copyright">
-    <p><span>文章标题:</span>微服务不停服升级</p>
-    <p><span>文章字数:</span><span class="post-count">501</span></p>
+    <p><span>文章标题:</span>使用log-pilot收集docker容器日志</p>
+    <p><span>文章字数:</span><span class="post-count">514</span></p>
     <p><span>本文作者:</span><a href="javascript:void(0)" title="武继明">武继明</a></p>
-    <p><span>发布时间:</span>2019-05-09, 14:41:32</p>
-    <p><span>最后更新:</span>2019-05-09, 15:36:28</p>
-    <span>原始链接:</span><a class="post-url" href="/2019/05/09/微服务不停服升级/" title="微服务不停服升级">https://www.omingo.com/2019/05/09/微服务不停服升级/</a>
+    <p><span>发布时间:</span>2019-05-21, 16:25:15</p>
+    <p><span>最后更新:</span>2019-05-21, 17:06:48</p>
+    <span>原始链接:</span><a class="post-url" href="/2019/05/21/使用log-pilot收集docker容器日志/" title="使用log-pilot收集docker容器日志">https://www.omingo.com/2019/05/21/使用log-pilot收集docker容器日志/</a>
     <p>
         <span>版权声明:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target="_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
     </p>
@@ -376,7 +382,7 @@
             repo: 'my-gittalk',
             owner: 'wzslw',
             admin: ['wzslw'],
-            id: 'Thu May 09 2019 14:41:32 GMT+0800',
+            id: 'Tue May 21 2019 16:25:15 GMT+0800',
             distractionFreeMode: 'true',
             language: 'zh-CN',
             perPage: parseInt('10',10)
