@@ -4,6 +4,25 @@
   
     
     <entry>
+      <title>国内microk8s安装指南</title>
+      <link href="/2019/06/21/%E5%9B%BD%E5%86%85microk8s%E5%AE%89%E8%A3%85%E6%8C%87%E5%8D%97/"/>
+      <url>/2019/06/21/%E5%9B%BD%E5%86%85microk8s%E5%AE%89%E8%A3%85%E6%8C%87%E5%8D%97/</url>
+      
+        <content type="html"><![CDATA[<p>microk8s 是一个专门为开发人员设计的轻量级单节点k8s包.可以用来替代minikube进行学习.</p><h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>由gfw,安装microk8s后会发现docker image无法下载的问题.(详细安装步骤参见 <a href="https://microk8s.io/#quick-start" target="_blank" rel="noopener">https://microk8s.io/#quick-start</a>)</p><p><code>microk8s.kubectl describe pods -A</code> 会有错误提示<br> <em>[ERROR ImagePull]: failed to pull image [k8s.gcr.io/pause:3.1]</em></p><h2 id="解决办法"><a href="#解决办法" class="headerlink" title="解决办法"></a>解决办法</h2><pre><code class="bash">docker pull mirrorgooglecontainers/pause:3.1docker pull mirrorgooglecontainers/heapster-influxdb-amd64:v1.3.3docker pull mirrorgooglecontainers/heapster-grafana-amd64:v4.4.3docker pull mirrorgooglecontainers/kubernetes-dashboard-amd64:v1.8.3docker pull mirrorgooglecontainers/heapster-amd64:v1.5.2docker pull mirrorgooglecontainers/k8s-dns-dnsmasq-nanny-amd64:1.14.7docker pull mirrorgooglecontainers/k8s-dns-kube-dns-amd64:1.14.7docker pull mirrorgooglecontainers/k8s-dns-sidecar-amd64:1.14.7docker tag mirrorgooglecontainers/pause:3.1 k8s.gcr.io/pause:3.1docker tag mirrorgooglecontainers/heapster-influxdb-amd64:v1.3.3 k8s.gcr.io/heapster-influxdb-amd64:v1.3.3docker tag mirrorgooglecontainers/heapster-grafana-amd64:v4.4.3 k8s.gcr.io/heapster-grafana-amd64:v4.4.3docker tag mirrorgooglecontainers/kubernetes-dashboard-amd64:v1.8.3 k8s.gcr.io/kubernetes-dashboard-amd64:v1.8.3docker tag mirrorgooglecontainers/heapster-amd64:v1.5.2 k8s.gcr.io/heapster-amd64:v1.5.2docker tag mirrorgooglecontainers/k8s-dns-dnsmasq-nanny-amd64:1.14.7 gcr.io/google_containers/k8s-dns-dnsmasq-nanny-amd64:1.14.7docker tag mirrorgooglecontainers/k8s-dns-kube-dns-amd64:1.14.7 gcr.io/google_containers/k8s-dns-kube-dns-amd64:1.14.7docker tag mirrorgooglecontainers/k8s-dns-sidecar-amd64:1.14.7 gcr.io/google_containers/k8s-dns-sidecar-amd64:1.14.7docker save k8s.gcr.io/pause &gt; pause.tardocker save k8s.gcr.io/heapster-influxdb-amd64 &gt; heapster-influxdb-amd64.tardocker save k8s.gcr.io/heapster-grafana-amd64 &gt; heapster-grafana-amd64.tardocker save k8s.gcr.io/kubernetes-dashboard-amd64 &gt; kubernetes-dashboard-amd64.tardocker save k8s.gcr.io/heapster-amd64 &gt; heapster-amd64.tardocker save gcr.io/google_containers/k8s-dns-dnsmasq-nanny-amd64 &gt; k8s-dns-dnsmasq-nanny-amd64.tardocker save gcr.io/google_containers/k8s-dns-kube-dns-amd64 &gt; k8s-dns-kube-dns-amd64.tardocker save gcr.io/google_containers/k8s-dns-sidecar-amd64 &gt; k8s-dns-sidecar-amd64.tarmicrok8s.ctr -n k8s.io image import pause.tarmicrok8s.ctr -n k8s.io image import heapster-influxdb-amd64.tarmicrok8s.ctr -n k8s.io image import heapster-grafana-amd64.tarmicrok8s.ctr -n k8s.io image import kubernetes-dashboard-amd64.tarmicrok8s.ctr -n k8s.io image import heapster-amd64.tarmicrok8s.ctr -n k8s.io image import k8s-dns-dnsmasq-nanny-amd64.tarmicrok8s.ctr -n k8s.io image import k8s-dns-kube-dns-amd64.tarmicrok8s.ctr -n k8s.io image import k8s-dns-sidecar-amd64.tar</code></pre><p>然后就可以愉快的玩耍了.</p>]]></content>
+      
+      
+      
+        <tags>
+            
+            <tag> k8s </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>使用log-pilot收集docker容器日志</title>
       <link href="/2019/05/21/%E4%BD%BF%E7%94%A8log-pilot%E6%94%B6%E9%9B%86docker%E5%AE%B9%E5%99%A8%E6%97%A5%E5%BF%97/"/>
       <url>/2019/05/21/%E4%BD%BF%E7%94%A8log-pilot%E6%94%B6%E9%9B%86docker%E5%AE%B9%E5%99%A8%E6%97%A5%E5%BF%97/</url>
