@@ -2,9 +2,9 @@
 <html>
 <head><meta name="generator" content="Hexo 3.8.0">
   <meta charset="utf-8">
-  <title>使用log-pilot收集docker容器日志 | 猿明园</title>
-  <meta name="keywords" content=" 日志 ">
-  <meta name="description" content="使用log-pilot收集docker容器日志 | 猿明园">
+  <title>k8s安装指南 | 猿明园</title>
+  <meta name="keywords" content=" k8s ">
+  <meta name="description" content="k8s安装指南 | 猿明园">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="description" content="页面未找到！">
 <meta property="og:type" content="website">
@@ -270,9 +270,9 @@
 </aside>
 <div class="post">
     <div class="pjax">
-        <article id="post-使用log-pilot收集docker容器日志" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-k8s安装指南" class="article article-type-post" itemscope itemprop="blogPost">
     
-        <h1 class="article-title">使用log-pilot收集docker容器日志</h1>
+        <h1 class="article-title">k8s安装指南</h1>
     
     <div class="article-meta">
         
@@ -281,19 +281,19 @@
         
         <span class="tag">
             
-            <a href="javascript:" class="color3">日志</a>
+            <a href="javascript:" class="color4">k8s</a>
             
         </span>
         
     </div>
     <div class="article-meta">
         
-        创建时间:<time class="date" title="更新时间: 2019-05-21 17:06:48">2019-05-21 16:25</time>
+        创建时间:<time class="date" title="更新时间: 2019-06-24 18:51:19">2019-06-24 15:33</time>
         
     </div>
     <div class="article-meta">
         
-        <span>字数:514</span>
+        <span>字数:1.3k</span>
         
         
         <span id="busuanzi_container_page_pv">
@@ -312,7 +312,7 @@
     
     <div class="toc-ref">
     
-        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#实践"><span class="toc-text">实践</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#准备机器"><span class="toc-text">准备机器</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#规划"><span class="toc-text">规划</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#修改主机名称-所有节点"><span class="toc-text">修改主机名称(所有节点)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#修改为静态地址-所有节点"><span class="toc-text">修改为静态地址(所有节点)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#关闭swap-所有节点"><span class="toc-text">关闭swap(所有节点)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#检查-mac地址-product-uuid-所有节点"><span class="toc-text">检查 mac地址,product_uuid(所有节点)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#安装docker-所有节点"><span class="toc-text">安装docker(所有节点)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#安装kubeadm-kubelet-and-kubectl-所有节点"><span class="toc-text">安装kubeadm, kubelet and kubectl(所有节点)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#准备镜像-所有节点"><span class="toc-text">准备镜像(所有节点)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#初始化集群-master节点"><span class="toc-text">初始化集群(master节点)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#配置授权信息-master节点"><span class="toc-text">配置授权信息(master节点)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#添加网络插件-master节点"><span class="toc-text">添加网络插件(master节点)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#设置master节点也可以运行Pod"><span class="toc-text">设置master节点也可以运行Pod</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#加入节点-worker节点"><span class="toc-text">加入节点(worker节点)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#测试一下"><span class="toc-text">测试一下</span></a></li></ol>
     
 <style>
     .left-col .switch-btn,
@@ -327,39 +327,173 @@
 </div>
     <div class="article-entry" itemprop="articleBody">
       
-        <p>本文档介绍一款新的 Docker 日志收集工具：log-pilot。log-pilot 是阿里云提供的日志收集镜像。我们可以在每台机器上部署一个 log-pilot 实例，就可以收集机器上所有 Docker 应用日志。(注意：只支持Linux版本的Docker，不支持Windows/Mac版)。</p>
-<p>log-pilot 具有如下特性：</p>
+        <h2 id="准备机器"><a href="#准备机器" class="headerlink" title="准备机器"></a>准备机器</h2><p>官方要求:</p>
 <ul>
-<li>一个单独的 log 进程收集机器上所有容器的日志。不需要为每个容器启动一个 log 进程。</li>
-<li>支持文件日志和 stdout。docker log dirver 亦或 logspout 只能处理 stdout，log-pilot 不仅支持收集 stdout 日志，还可以收集文件日志。</li>
-<li>声明式配置。当您的容器有日志要收集，只要通过 label 声明要收集的日志文件的路径，无需改动其他任何配置，log-pilot 就会自动收集新容器的日志。</li>
-<li>支持多种日志存储方式。无论是强大的阿里云日志服务，还是比较流行的 elasticsearch 组合，甚至是 graylog，log-pilot 都能把日志投递到正确的地点。</li>
-<li><p>开源。log-pilot 完全开源，您可以从 Git项目地址 <a href="https://github.com/AliyunContainerService/log-pilot" target="_blank" rel="noopener">下载代码</a>。如果现有的功能不能满足您的需要，欢迎提 issue。</p>
-<img src="/2019/05/21/使用log-pilot收集docker容器日志/1.png">
-</li>
+<li>ubuntu16.04+</li>
+<li>内存≥2G</li>
+<li>cpu≥2</li>
+<li>机器间网络互通</li>
+<li>每个节点的hostname,mac地址,product_uuid要唯一.</li>
+<li>swap要禁用.</li>
 </ul>
-<h2 id="实践"><a href="#实践" class="headerlink" title="实践"></a>实践</h2><p>先有应用使用单机docker部署,需要将docker容器产生的日志发送到kafka.</p>
-<p>首先部署log-pilot镜像,用来感知容器日志并发送日志到目的地:</p>
-<pre><code>docker run --name log-pilot -d \
--v /var/run/docker.sock:/var/run/docker.sock \
--v /etc/localtime:/etc/localtime \
--v /:/host:ro \
---cap-add SYS_ADMIN \
--e LOGGING_OUTPUT=kafka \ #选择输入类型 kafka
--e KAFKA_BROKERS=kafka:9092 \ # 配置kafka的地址
-registry.cn-hangzhou.aliyuncs.com/acs/log-pilot:0.9.5-filebeat
-</code></pre><p>运行docker应用的时候只需要增加标签 aliyun.$name.*:<br>如:</p>
-<pre><code>docker run -it --rm -p 10080:8080 \
--v /usr/local/tomcat/logs \
---label aliyun.logs.catalina=stdout \ 
---label aliyun.logs.access=/usr/local/tomcat/logs/localhost_access_log.*.txt \
-tomcat
-</code></pre><p>还可以自定义输入的target:<br>aliyun.$name.target=&lt;target&gt;<br>&lt;target&gt;:自定义字符串,分别指代:</p>
-<ol>
-<li>eleasticsearch-&gt;index</li>
-<li>kafka-&gt;topic</li>
+<h3 id="规划"><a href="#规划" class="headerlink" title="规划"></a>规划</h3><table>
+<thead>
+<tr>
+<th>ip</th>
+<th>角色</th>
+<th>hostname</th>
+<th>配置</th>
+<th>系统</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td> 192.168.1.36</td>
+<td>master</td>
+<td>node1</td>
+<td>2G/2C</td>
+<td>ubuntu18.04</td>
+</tr>
+<tr>
+<td> 192.168.1.37</td>
+<td>node</td>
+<td>node2</td>
+<td>2G/2C</td>
+<td>ubuntu18.04</td>
+</tr>
+<tr>
+<td> 192.168.1.38</td>
+<td>node</td>
+<td>node3</td>
+<td>2G/2C</td>
+<td>ubuntu18.04</td>
+</tr>
+</tbody>
+</table>
+<p>我使用的是vbox,网络模式使用桥接.安装一个完一个虚拟机之后,复制除另外两个,复制的时候选中”重新初始化所有网卡的MAC地址”<br><img src="/2019/06/24/k8s安装指南/1.png"></p>
+<h3 id="修改主机名称-所有节点"><a href="#修改主机名称-所有节点" class="headerlink" title="修改主机名称(所有节点)"></a>修改主机名称(所有节点)</h3><pre><code class="bash">sudo sed -i &#39;/preserve_hostname: false/c\preserve_hostname: true&#39; /etc/cloud/cloud.cfg &amp;&amp; sudo hostnamectl set-hostname {新hostname}
+</code></pre>
+<p>退出重新登录后hostname就会改变.<br>参考:<a href="https://askubuntu.com/questions/1028633/host-name-reverts-to-old-name-after-reboot-in-18-04-lts" target="_blank" rel="noopener">修改ubuntu18.04hostname</a></p>
+<h3 id="修改为静态地址-所有节点"><a href="#修改为静态地址-所有节点" class="headerlink" title="修改为静态地址(所有节点)"></a>修改为静态地址(所有节点)</h3><ol>
+<li>执行命令<code>sudo vim /etc/netplan/50-cloud-init.yaml</code></li>
+<li>更改配置<pre><code class="yml">network:
+   ethernets:
+       enp0s3:
+           addresses: [192.168.1.37/24] # 静态ip
+           gateway4: 192.168.1.1 # 网关
+           nameservers:
+                   addresses: [192.168.1.254] #DNS
+   version: 2
+</code></pre>
+</li>
+<li>使设置生效<code>sudo netplan apply</code></li>
 </ol>
-<p>参考文章:<br><a href="https://yq.aliyun.com/articles/674327" target="_blank" rel="noopener">日志采集利器</a></p>
+<p>参考 <a href="https://ywnz.com/linuxjc/1491.html" target="_blank" rel="noopener">ubuntu 18.04 netplan yaml配置固定IP地址</a></p>
+<h3 id="关闭swap-所有节点"><a href="#关闭swap-所有节点" class="headerlink" title="关闭swap(所有节点)"></a>关闭swap(所有节点)</h3><p><code>sudo swapoff -a</code><br><code>sudo vim /etc/fstab</code> 注释掉 swap那一行,如下:</p>
+<pre><code>UUID=f229223e-9634-11e9-9470-080027aa5c7f / ext4 defaults 0 0
+#/swap.img    none    swap    sw    0    0  
+</code></pre><h3 id="检查-mac地址-product-uuid-所有节点"><a href="#检查-mac地址-product-uuid-所有节点" class="headerlink" title="检查 mac地址,product_uuid(所有节点)"></a>检查 mac地址,product_uuid(所有节点)</h3><pre><code class="bash">ip link # 查看mac
+sudo cat /sys/class/dmi/id/product_uuid # 查看product_uuid
+</code></pre>
+<p>一般情况下不会冲突.(反正我没遇到这种情况☺)</p>
+<h2 id="安装docker-所有节点"><a href="#安装docker-所有节点" class="headerlink" title="安装docker(所有节点)"></a>安装docker(所有节点)</h2><p>国内网络环境,你懂得.<br>使用阿里云提供的方案快速安装: <code>curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun</code><br><a href="https://yq.aliyun.com/articles/110806" target="_blank" rel="noopener">Docker CE 镜像源站</a></p>
+<p>请自行配置docker镜像加速.</p>
+<h2 id="安装kubeadm-kubelet-and-kubectl-所有节点"><a href="#安装kubeadm-kubelet-and-kubectl-所有节点" class="headerlink" title="安装kubeadm, kubelet and kubectl(所有节点)"></a>安装kubeadm, kubelet and kubectl(所有节点)</h2><p>安装k8s需要安装这三个包:</p>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>作用 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td> kubeadm</td>
+<td>用来引导集群 </td>
+</tr>
+<tr>
+<td> kubelet</td>
+<td>在群集中的所有计算机上运行的组件，并执行诸如启动pod和容器之类的操作</td>
+</tr>
+<tr>
+<td> kubectl</td>
+<td>用来和集群通信的命令行工具</td>
+</tr>
+</tbody>
+</table>
+<p>国内网络环境,这回应该懂了吧…</p>
+<pre><code class="bash"># 使用root操作
+sudo su 
+apt-get update &amp;&amp; apt-get install -y apt-transport-https
+curl https://mirrors.aliyun.com/kubernetes/apt/doc/apt-key.gpg | apt-key add - 
+cat &lt;&lt;EOF &gt;/etc/apt/sources.list.d/kubernetes.list
+deb https://mirrors.aliyun.com/kubernetes/apt/ kubernetes-xenial main
+EOF  
+apt-get update
+apt-get install -y kubelet kubeadm kubectl
+</code></pre>
+<h3 id="准备镜像-所有节点"><a href="#准备镜像-所有节点" class="headerlink" title="准备镜像(所有节点)"></a>准备镜像(所有节点)</h3><p>集群初始化的时候需要从k8s.gcr.io拉取镜像,但是国内网络环境,你懂得.</p>
+<ol>
+<li><code>kubeadm config images list</code> 查看使用到的镜像<pre><code>kubeadm config images list
+k8s.gcr.io/kube-apiserver:v1.15.0
+k8s.gcr.io/kube-controller-manager:v1.15.0
+k8s.gcr.io/kube-scheduler:v1.15.0
+k8s.gcr.io/kube-proxy:v1.15.0
+k8s.gcr.io/pause:3.1
+k8s.gcr.io/etcd:3.3.10
+k8s.gcr.io/coredns:1.3.1
+</code></pre></li>
+<li>手动获取一下镜像<pre><code>#上面那一堆复制下来
+images=(
+ k8s.gcr.io/kube-apiserver:v1.15.0
+ k8s.gcr.io/kube-controller-manager:v1.15.0
+ k8s.gcr.io/kube-scheduler:v1.15.0
+ k8s.gcr.io/kube-proxy:v1.15.0
+ k8s.gcr.io/pause:3.1
+ k8s.gcr.io/etcd:3.3.10
+ k8s.gcr.io/coredns:1.3.1
+)
+for imageName in ${images[@]} ; do
+ imageName=${imageName##*/}
+ docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/$imageName
+ docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/$imageName k8s.gcr.io/$imageName
+ docker rmi registry.cn-hangzhou.aliyuncs.com/google_containers/$imageName
+done 
+</code></pre><h2 id="初始化集群-master节点"><a href="#初始化集群-master节点" class="headerlink" title="初始化集群(master节点)"></a>初始化集群(master节点)</h2></li>
+</ol>
+<pre><code># 因为使用flannel网络插件,需要在kubeadm init 时设置 --pod-network-cidr=10.244.0.0/16
+sudo kubeadm init --pod-network-cidr=10.244.0.0/16
+</code></pre><h2 id="配置授权信息-master节点"><a href="#配置授权信息-master节点" class="headerlink" title="配置授权信息(master节点)"></a>配置授权信息(master节点)</h2><p>集群初始化后有提示</p>
+<pre><code>mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+</code></pre><h2 id="添加网络插件-master节点"><a href="#添加网络插件-master节点" class="headerlink" title="添加网络插件(master节点)"></a>添加网络插件(master节点)</h2><p>执行<code>kubectl get pods -A</code> 会发现coredns状态为pending.以为还没有安装网络插件,所有和网络相关的pod都会为pending.<br>集群初始化完成后也有提示<code>You should now deploy a pod network to the cluster.</code><br>添加网络插件:</p>
+<pre><code>kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+</code></pre><p>稍等片刻,再次执行 <code>kubectl get pods -A</code> ,所有POD 都running了.</p>
+<h2 id="设置master节点也可以运行Pod"><a href="#设置master节点也可以运行Pod" class="headerlink" title="设置master节点也可以运行Pod"></a>设置master节点也可以运行Pod</h2><p>kubernetes官方默认策略是worker节点运行Pod，master节点不运行Pod。如果只是为了开发或者其他目的而需要部署单节点集群，可以通过以下的命令设置<br><code>kubectl taint nodes --all node-role.kubernetes.io/master-</code></p>
+<h2 id="加入节点-worker节点"><a href="#加入节点-worker节点" class="headerlink" title="加入节点(worker节点)"></a>加入节点(worker节点)</h2><p>集群初始化完成后也有提示:</p>
+<pre><code>Then you can join any number of worker nodes by running the following on each as root:
+kubeadm join 192.168.1.36:6443 --token 9wujqe.xfc5msp9l3i9g9s8 \
+    --discovery-token-ca-cert-hash sha256:1c67699dbf329cceff693a37a6b3f2c4d706901673343a24c872d802a7ed3433
+</code></pre><h2 id="测试一下"><a href="#测试一下" class="headerlink" title="测试一下"></a>测试一下</h2><p>在master执行:</p>
+<pre><code>kubectl get nodes 
+#此时应该有三个节点
+NAME    STATUS   ROLES    AGE    VERSION
+node1   Ready    master   36m    v1.15.0
+node2   Ready    &lt;none&gt;   8m2s   v1.15.0
+node3   Ready    &lt;none&gt;   29s    v1.15.0
+</code></pre><p>创建个deployment试试</p>
+<pre><code>kubectl run my-nginx --image=nginx --replicas=3 --port=80
+# 稍等片刻
+kubectl get pods -o wide
+# 应该这样的
+NAME                        READY   STATUS    RESTARTS   AGE   IP           NODE    NOMINATED NODE   READINESS GATES
+my-nginx-756fb87568-ssxj5   1/1     Running   0          94s   10.244.0.4   node1   &lt;none&gt;           &lt;none&gt;
+my-nginx-756fb87568-x2mtk   1/1     Running   0          94s   10.244.2.2   node3   &lt;none&gt;           &lt;none&gt;
+my-nginx-756fb87568-zkjxj   1/1     Running   0          94s   10.244.1.2   node2   &lt;none&gt;           &lt;none&gt;
+</code></pre><p>创建个service试试</p>
+<pre><code>kubectl expose deployment my-nginx --name=my-nginx --port 80 --target-port 80 --type NodePort --external-ip 192.168.1.36
+</code></pre><p>打开浏览器访问一下 192.168.1.36,nginx首页.<br><img src="/2019/06/24/k8s安装指南/2.png"><br>可以愉快的玩耍了.</p>
 
       
        <hr><span style="font-style: italic;color: gray;"> 转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。可以在下面评论区评论，也可以邮件至 wzslw@163.com </span>
@@ -373,12 +507,12 @@ tomcat
 
 
 <div class="article_copyright">
-    <p><span>文章标题:</span>使用log-pilot收集docker容器日志</p>
-    <p><span>文章字数:</span><span class="post-count">514</span></p>
+    <p><span>文章标题:</span>k8s安装指南</p>
+    <p><span>文章字数:</span><span class="post-count">1.3k</span></p>
     <p><span>本文作者:</span><a href="javascript:void(0)" title="武继明">武继明</a></p>
-    <p><span>发布时间:</span>2019-05-21, 16:25:15</p>
-    <p><span>最后更新:</span>2019-05-21, 17:06:48</p>
-    <span>原始链接:</span><a class="post-url" href="/2019/05/21/使用log-pilot收集docker容器日志/" title="使用log-pilot收集docker容器日志">https://www.omingo.com/2019/05/21/使用log-pilot收集docker容器日志/</a>
+    <p><span>发布时间:</span>2019-06-24, 15:33:49</p>
+    <p><span>最后更新:</span>2019-06-24, 18:51:19</p>
+    <span>原始链接:</span><a class="post-url" href="/2019/06/24/k8s安装指南/" title="k8s安装指南">https://www.omingo.com/2019/06/24/k8s安装指南/</a>
     <p>
         <span>版权声明:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target="_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
     </p>
@@ -396,7 +530,7 @@ tomcat
             repo: 'my-gittalk',
             owner: 'wzslw',
             admin: ['wzslw'],
-            id: 'Tue May 21 2019 16:25:15 GMT+0800',
+            id: 'Mon Jun 24 2019 15:33:49 GMT+0800',
             distractionFreeMode: 'true',
             language: 'zh-CN',
             perPage: parseInt('10',10)
