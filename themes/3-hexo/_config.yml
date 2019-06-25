@@ -186,8 +186,8 @@ gitalk:
   on: true
   githubID: omingo-cn
   repo: omingo-cn
-  ClientID: 39ce50aafebf22ff500c
-  ClientSecret: 4a379daf0cbc4a6cd3e2427ddcfa638b4e03270b
+  ClientID: cefdfb8adbe2aa4f6659
+  ClientSecret: 1b70e598bd83fc87a81a9360226da0509c0d9e09
   adminUser: wzslw
   distractionFreeMode: true
   language: zh-CN
@@ -208,8 +208,8 @@ gitment:
   on: false
   owner: omingo-cn
   repo: omingo-cn
-  client_id: 39ce50aafebf22ff500c
-  client_secret: 4a379daf0cbc4a6cd3e2427ddcfa638b4e03270b
+  client_id: cefdfb8adbe2aa4f6659
+  client_secret: 1b70e598bd83fc87a81a9360226da0509c0d9e09
   # gitment : 通过github issue实现的评论系统
   # 开源地址 : https://github.com/imsun/gitment
   # 使用说明 :
