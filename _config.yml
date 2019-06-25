@@ -91,5 +91,5 @@ theme: 3-hexo
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
   type: git
-  repo: git@git.coding.net:sylarlove/sylarlove.git
-  branch: coding-pages
+  repo: git@github.com:omingo-cn/omingo-cn.git
+  branch: gh-pages
