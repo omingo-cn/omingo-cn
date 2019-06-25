@@ -186,7 +186,7 @@ my-nginx-756fb87568-zkjxj   1/1     Running   0          94s   10.244.1.2   node
 ```
 创建个service试试
 ```
-kubectl expose deployment my-nginx --name=my-nginx --port 80 --target-port 80 --type NodePort --external-ip 192.168.1.36
+kubectl expose deployment my-nginx --name=my-nginx --port 80 --target-port 80 --external-ip 192.168.1.36
 ```
 打开浏览器访问一下 192.168.1.36,nginx首页.
 {% asset_img 2.png %}
