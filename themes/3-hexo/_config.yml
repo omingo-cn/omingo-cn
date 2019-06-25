@@ -184,8 +184,8 @@ gentie:
 
 gitalk:
   on: true
-  githubID: wzslw
-  repo: omingo-cn/omingo-cn
+  githubID: omingo-cn
+  repo: omingo-cn
   ClientID: 39ce50aafebf22ff500c
   ClientSecret: 4a379daf0cbc4a6cd3e2427ddcfa638b4e03270b
   adminUser: wzslw
@@ -206,8 +206,8 @@ gitalk:
 
 gitment:
   on: false
-  owner: wzslw
-  repo: omingo-cn/omingo-cn
+  owner: omingo-cn
+  repo: omingo-cn
   client_id: 39ce50aafebf22ff500c
   client_secret: 4a379daf0cbc4a6cd3e2427ddcfa638b4e03270b
   # gitment : 通过github issue实现的评论系统
