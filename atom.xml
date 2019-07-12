@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://www.omingo.com/"/>
-  <updated>2019-06-25T04:01:52.947Z</updated>
+  <updated>2019-07-12T09:40:38.072Z</updated>
   <id>https://www.omingo.com/</id>
   
   <author>
@@ -15,6 +15,35 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>k8s上运行mysql</title>
+    <link href="https://www.omingo.com/2019/07/12/k8s%E4%B8%8A%E8%BF%90%E8%A1%8Cmysql/"/>
+    <id>https://www.omingo.com/2019/07/12/k8s上运行mysql/</id>
+    <published>2019-07-12T09:19:17.000Z</published>
+    <updated>2019-07-12T09:40:38.072Z</updated>
+    
+    <content type="html"><![CDATA[<p>k8s中跑mysql要求:</p><ol><li>可通过节点ip访问mysql.</li><li>pod可以访问mysql.</li><li>机器重启后mysql数据不丢失.</li></ol><pre><code class="yml">apiVersion: extensions/v1beta1kind: Deploymentmetadata:  name: mysqlspec:  template:    metadata:      labels:        app: mysql    spec:      nodeName: node1 #指定pod只能调度到node1上      containers:      - image: mysql:5.6        name: mysql        env:        - name: &#39;MYSQL_ROOT_PASSWORD&#39;          value: &#39;root&#39;        - name: &quot;TZ&quot;          value: &quot;Asia/Shanghai&quot; #指定mysql容器的时区为CST,默认为UTC        ports:        - containerPort: 3306        volumeMounts:        - mountPath: /var/lib/mysql          name: mysql-volume      volumes:      - name: mysql-volume # 使用hostPath讲数据文件挂载出来        hostPath:          path: /data/mysql---apiVersion: v1kind: Servicemetadata:   name: mysqlspec:  selector:    app: mysql  type: NodePort  ports:  - port: 3306 # pod中通过 mysql:3306 访问    nodePort: 32306 # 集群外部通过 节点IP:32306访问</code></pre><p>使用hostPath类型的volume持久化数据文件,nodeName固定调度节点,NodePort暴露服务.<br>肥肠地方便.</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;k8s中跑mysql要求:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;可通过节点ip访问mysql.&lt;/li&gt;
+&lt;li&gt;pod可以访问mysql.&lt;/li&gt;
+&lt;li&gt;机器重启后mysql数据不丢失.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code class=&quot;yml&quot;&gt;apiVersion:
+      
+    
+    </summary>
+    
+    
+      <category term="k8s" scheme="https://www.omingo.com/tags/k8s/"/>
+    
+  </entry>
   
   <entry>
     <title>k8s安装指南</title>
