@@ -109,8 +109,8 @@ table: green_title
 
 # 文章列表背景图
 article_bg_img:
-  on: false
-  src: http://img.xiangzhangshugongyi.com/FlSExUGfRSaqxkK5v42CpuI-tXAL.jpg
+  on: true
+  src: https://imgchr.com/content/images/system/home_cover_1552414407320_3a5f92.jpg
 
 # 点击图片放大样式
 img_resize: default
@@ -128,7 +128,7 @@ code:
 highlight:
   on: true # true开启代码高亮
   lineNum: true # true显示行号
-  theme: darcula
+  theme: sublime
 # 代码高亮主题,效果可以查看 https://highlightjs.org/static/demo/
 # 支持主题：
 # sublime : 参考sublime的高亮主题
