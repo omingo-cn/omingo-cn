@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://www.omingo.com/"/>
-  <updated>2020-05-09T10:34:43.118Z</updated>
+  <updated>2020-05-09T10:37:41.960Z</updated>
   <id>https://www.omingo.com/</id>
   
   <author>
@@ -21,7 +21,7 @@
     <link href="https://www.omingo.com/2020/05/09/keycloak-%E8%B0%83%E6%95%B4%E6%97%A5%E5%BF%97%E6%89%93%E5%8D%B0%E7%BA%A7%E5%88%AB/"/>
     <id>https://www.omingo.com/2020/05/09/keycloak-调整日志打印级别/</id>
     <published>2020-05-09T10:33:37.000Z</published>
-    <updated>2020-05-09T10:34:43.118Z</updated>
+    <updated>2020-05-09T10:37:41.960Z</updated>
     
     <content type="html"><![CDATA[<h1 id="keycloak-调整日志打印级别"><a href="#keycloak-调整日志打印级别" class="headerlink" title="keycloak-调整日志打印级别"></a>keycloak-调整日志打印级别</h1><p>在开发环境中我们需要调整一下keycloak的日志打印级别,以便我们更方便的了解系统内部执行的情况.</p><p>在<code>standalon.xml</code>搜索<em>urn:jboss:domain:logging</em>,然后修改为:</p><pre><code class="xml">        &lt;subsystem xmlns=&quot;urn:jboss:domain:logging:8.0&quot;&gt;            &lt;console-handler name=&quot;CONSOLE&quot;&gt;                &lt;level name=&quot;DEBUG&quot;/&gt; &lt;!--修改控制台打印级别问题DEBUG--&gt;                &lt;formatter&gt;                    &lt;named-formatter name=&quot;COLOR-PATTERN&quot;/&gt;                &lt;/formatter&gt;            &lt;/console-handler&gt;            &lt;periodic-rotating-file-handler name=&quot;FILE&quot; autoflush=&quot;true&quot;&gt;                &lt;formatter&gt;                    &lt;named-formatter name=&quot;PATTERN&quot;/&gt;                &lt;/formatter&gt;                &lt;file relative-to=&quot;jboss.server.log.dir&quot; path=&quot;server.log&quot;/&gt;                &lt;suffix value=&quot;.yyyy-MM-dd&quot;/&gt;                &lt;append value=&quot;true&quot;/&gt;            &lt;/periodic-rotating-file-handler&gt;            &lt;logger category=&quot;com.arjuna&quot;&gt;                &lt;level name=&quot;WARN&quot;/&gt;            &lt;/logger&gt;            &lt;logger category=&quot;io.jaegertracing.Configuration&quot;&gt;                &lt;level name=&quot;WARN&quot;/&gt;            &lt;/logger&gt;            &lt;logger category=&quot;org.jboss.as.config&quot;&gt;                &lt;level name=&quot;DEBUG&quot;/&gt;            &lt;/logger&gt;            &lt;logger category=&quot;sun.rmi&quot;&gt;                &lt;level name=&quot;WARN&quot;/&gt;            &lt;/logger&gt;            &lt;logger category=&quot;org.keycloak&quot;&gt; &lt;!--增加keycloak logger--&gt;                &lt;level name=&quot;DEBUG&quot;/&gt;            &lt;/logger&gt;                        &lt;root-logger&gt;                &lt;level name=&quot;INFO&quot;/&gt;                &lt;handlers&gt;                    &lt;handler name=&quot;CONSOLE&quot;/&gt;                    &lt;handler name=&quot;FILE&quot;/&gt;                &lt;/handlers&gt;            &lt;/root-logger&gt;            &lt;formatter name=&quot;PATTERN&quot;&gt;                &lt;pattern-formatter pattern=&quot;%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n&quot;/&gt;            &lt;/formatter&gt;            &lt;formatter name=&quot;COLOR-PATTERN&quot;&gt;                &lt;pattern-formatter pattern=&quot;%K{level}%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n&quot;/&gt;            &lt;/formatter&gt;        &lt;/subsystem&gt;</code></pre><p>结果:<br><img src="20200509104304377_598798424.png" alt></p>]]></content>
     
@@ -38,6 +38,8 @@
     
     
       <category term="keycloak" scheme="https://www.omingo.com/tags/keycloak/"/>
+    
+      <category term="日志" scheme="https://www.omingo.com/tags/%E6%97%A5%E5%BF%97/"/>
     
   </entry>
   
