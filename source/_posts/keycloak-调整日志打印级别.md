@@ -4,6 +4,7 @@ date: 2020-05-09 18:33:37
 categories: Keycloak
 tags:
 - keycloak
+-  日志
 ---
 
 # keycloak-调整日志打印级别
