@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://www.omingo.com/"/>
-  <updated>2019-07-12T09:40:38.072Z</updated>
+  <updated>2020-05-09T10:23:18.232Z</updated>
   <id>https://www.omingo.com/</id>
   
   <author>
@@ -15,6 +15,32 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>keycloak源码分析-启动</title>
+    <link href="https://www.omingo.com/2020/05/09/keycloak%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-%E5%90%AF%E5%8A%A8/"/>
+    <id>https://www.omingo.com/2020/05/09/keycloak源码分析-启动/</id>
+    <published>2020-05-09T10:12:34.000Z</published>
+    <updated>2020-05-09T10:23:18.232Z</updated>
+    
+    <content type="html"><![CDATA[<p>分析版本: 10.0.0</p><h2 id="web-xml"><a href="#web-xml" class="headerlink" title="web.xml"></a>web.xml</h2><p><img src="20200508112409320_335053284.png" alt></p><ol><li><p><code>module-name</code>为<em>auth</em>,这就是为什么启动keyloak服务后要通过 <a href="http://domain/auth进行访问应用的原因了" target="_blank" rel="noopener">http://domain/auth进行访问应用的原因了</a>.</p></li><li><p>我们发现有一个<code>load-on-startup</code>的servlet声明,这个是restEasy的启动声明,详细请参考<a href="https://docs.jboss.org/resteasy/docs/4.5.3.Final/userguide/html/Installation_Configuration.html#d4e143" target="_blank" rel="noopener">Older servlet containers</a>.</p></li></ol><h2 id="WildflyLifecleListener"><a href="#WildflyLifecleListener" class="headerlink" title="WildflyLifecleListener"></a>WildflyLifecleListener</h2><p>里面有个<code>listener</code>声明,实际上启动阶段这个listener什么都没做,到时容器关闭的时候,执行了一个shutdownHook.</p><p><img src="20200508115559301_1073305909.png" alt></p><h2 id="KeycloakApplication"><a href="#KeycloakApplication" class="headerlink" title="KeycloakApplication"></a>KeycloakApplication</h2><p>这个是keycloak启动的入口.</p><div id="flowchart-0" class="flow-chart"></div><p>这里的启动hook主要是做一些系统升级相关的逻辑.关联的shutdownhook主要是把之前创建的sessionFactory关掉. 这个shutdownhook实在上一节中提到的<code>WildflyLifecleListener</code>中调用的</p><p>启动过程中不管出现任何异常,keycloak都会直接exit.</p><h2 id="KeycloakSessionServletFilter"><a href="#KeycloakSessionServletFilter" class="headerlink" title="KeycloakSessionServletFilter"></a>KeycloakSessionServletFilter</h2><p>目光再次回到<code>web.xml</code>上来,这里还有一个<code>KeycloakSessionServletFilter</code>,看一下里面的<code>doFilter</code>都做了什么:</p><p><img src="20200508132807887_775282546.png" alt>SessionFactory和</p><div id="flowchart-1" class="flow-chart"></div><p>这个filter负责创建session,并且打开事务,当出现异常的时候自动回滚事务.当没又出现异常的时候这个事务是如何提交的呢,继续往下分析.</p><h2 id="KeycloakTransactionCommitter"><a href="#KeycloakTransactionCommitter" class="headerlink" title="KeycloakTransactionCommitter"></a>KeycloakTransactionCommitter</h2><p>在上面的KeycloakApplication的代码分析中有这么一句<code>classes.add(KeycloakTransactionCommitter.class);</code>看名字应该是做事务提交用的.</p><p><img src="20200508135716767_851192680.png" alt></p><p>果真如此,但是它只负责在response阶段提交事务,如果提交事务出现异常的时候会直接将异常抛出,然后由<code>KeycloakSessionServletFilter</code>捕获后做回滚.</p><h2 id="RestEasyContext"><a href="#RestEasyContext" class="headerlink" title="RestEasyContext"></a>RestEasyContext</h2><p>目前已经大该分析完了keycloak的启动过程,启动完成后restEasyContext中被push了下面这些对象,这些对象是可以直接通过注解进行注入的.</p><table><thead><tr><th>序号</th><th>类型</th><th>作用域</th><th>描述</th></tr></thead><tbody><tr><td>1</td><td>KeycloakApplication</td><td>gloable</td><td></td></tr><tr><td>2</td><td>KeycloakApplication</td><td>thread</td><td>for injection</td></tr><tr><td>3</td><td>KeycloakSession</td><td>thread</td><td></td></tr><tr><td>4</td><td>ClientConnection</td><td>thread</td><td></td></tr><tr><td>5</td><td>KeycloakTransaction</td><td>thread</td><td></td><td><script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.2.7/raphael.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/flowchart/1.6.5/flowchart.min.js"></script><textarea id="flowchart-0-code" style="display: none">loadConfig=>operation: 加载配置createSessionFectory=>operation: 创建createSessionFactory并将实例加入servletContextresteasyContextPush=>operation: 当前keycloakApplication实例加入resteasyContextaddResource=>operation: 添加resource,filter,事务管理,异常处理和资源解析器addHook=>operation: 执行启动hook,关联shutdownhookloadConfig->createSessionFectory->resteasyContextPush->addResource->addHook->loadConfig</textarea><textarea id="flowchart-0-options" style="display: none">{"scale":1,"line-width":2,"line-length":50,"text-margin":10,"font-size":12}</textarea><script>  var code = document.getElementById("flowchart-0-code").value;  var options = JSON.parse(decodeURIComponent(document.getElementById("flowchart-0-options").value));  var diagram = flowchart.parse(code);  diagram.drawSVG("flowchart-0", options);</script><textarea id="flowchart-1-code" style="display: none">encoding=>operation: 设置请求编码为UTF-8getSessionFactory=>operation: 从servletRequestContext中取出sessionFactorycreateSession=>operation: 创建keycloakSession并push到ResteasyContextconnection=>operation: 由request创建了一个ClientConnection对象并关联到sessionContext和push到resteasyContexttx=>operation: 从session获取事务管理器实例并push进resteasyContext,然后打开事务doFilter=>operation: doFilterexception=>condition: 有异常?rollbackTx=>operation: 回滚事务closeSession=>operation: 关闭sessioncleanRestEasyContext=>operation: 清理restEasyContextDataencoding->getSessionFactory->createSession->connection->tx->doFilter->exceptionexception(yes)->closeSessionexception(no)->rollbackTx->closeSession->cleanRestEasyContext</textarea><textarea id="flowchart-1-options" style="display: none">{"scale":1,"line-width":2,"line-length":50,"text-margin":10,"font-size":12}</textarea><script>  var code = document.getElementById("flowchart-1-code").value;  var options = JSON.parse(decodeURIComponent(document.getElementById("flowchart-1-options").value));  var diagram = flowchart.parse(code);  diagram.drawSVG("flowchart-1", options);</script></td></tr></tbody></table>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;分析版本: 10.0.0&lt;/p&gt;
+&lt;h2 id=&quot;web-xml&quot;&gt;&lt;a href=&quot;#web-xml&quot; class=&quot;headerlink&quot; title=&quot;web.xml&quot;&gt;&lt;/a&gt;web.xml&lt;/h2&gt;&lt;p&gt;&lt;img src=&quot;20200508112409320_33
+      
+    
+    </summary>
+    
+      <category term="Keycloak" scheme="https://www.omingo.com/categories/Keycloak/"/>
+    
+    
+      <category term="keycloak" scheme="https://www.omingo.com/tags/keycloak/"/>
+    
+  </entry>
   
   <entry>
     <title>k8s上运行mysql</title>

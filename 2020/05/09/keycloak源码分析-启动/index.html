@@ -2,9 +2,9 @@
 <html>
 <head><meta name="generator" content="Hexo 3.8.0">
   <meta charset="utf-8">
-  <title>k8s安装指南 | 猿明园</title>
-  <meta name="keywords" content=" k8s ">
-  <meta name="description" content="k8s安装指南 | 猿明园">
+  <title>keycloak源码分析-启动 | 猿明园</title>
+  <meta name="keywords" content=" keycloak ">
+  <meta name="description" content="keycloak源码分析-启动 | 猿明园">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="description" content="页面未找到！">
 <meta property="og:type" content="website">
@@ -290,30 +290,36 @@
 </aside>
 <div class="post">
     <div class="pjax">
-        <article id="post-k8s安装指南" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-keycloak源码分析-启动" class="article article-type-post" itemscope itemprop="blogPost">
     
-        <h1 class="article-title">k8s安装指南</h1>
+        <h1 class="article-title">keycloak源码分析-启动</h1>
     
     <div class="article-meta">
         
         
         
+        <span class="book">
+            
+            <a href="javascript:" data-rel="Keycloak">Keycloak</a>
+            
+        </span>
+        
         
         <span class="tag">
             
-            <a href="javascript:" class="color4">k8s</a>
+            <a href="javascript:" class="color4">keycloak</a>
             
         </span>
         
     </div>
     <div class="article-meta">
         
-        创建时间:<time class="date" title="更新时间: 2019-06-25 12:01:52">2019-06-24 15:33</time>
+        创建时间:<time class="date" title="更新时间: 2020-05-09 18:23:18">2020-05-09 18:12</time>
         
     </div>
     <div class="article-meta">
         
-        <span>字数:1.3k</span>
+        <span>字数:677</span>
         
         
         <span id="busuanzi_container_page_pv">
@@ -332,7 +338,7 @@
     
     <div class="toc-ref">
     
-        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#准备机器"><span class="toc-text">准备机器</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#规划"><span class="toc-text">规划</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#修改主机名称-所有节点"><span class="toc-text">修改主机名称(所有节点)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#修改为静态地址-所有节点"><span class="toc-text">修改为静态地址(所有节点)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#关闭swap-所有节点"><span class="toc-text">关闭swap(所有节点)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#检查-mac地址-product-uuid-所有节点"><span class="toc-text">检查 mac地址,product_uuid(所有节点)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#安装docker-所有节点"><span class="toc-text">安装docker(所有节点)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#安装kubeadm-kubelet-and-kubectl-所有节点"><span class="toc-text">安装kubeadm, kubelet and kubectl(所有节点)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#准备镜像-所有节点"><span class="toc-text">准备镜像(所有节点)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#初始化集群-master节点"><span class="toc-text">初始化集群(master节点)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#配置授权信息-master节点"><span class="toc-text">配置授权信息(master节点)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#添加网络插件-master节点"><span class="toc-text">添加网络插件(master节点)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#设置master节点也可以运行Pod"><span class="toc-text">设置master节点也可以运行Pod</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#加入节点-worker节点"><span class="toc-text">加入节点(worker节点)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#测试一下"><span class="toc-text">测试一下</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#web-xml"><span class="toc-text">web.xml</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#WildflyLifecleListener"><span class="toc-text">WildflyLifecleListener</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#KeycloakApplication"><span class="toc-text">KeycloakApplication</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#KeycloakSessionServletFilter"><span class="toc-text">KeycloakSessionServletFilter</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#KeycloakTransactionCommitter"><span class="toc-text">KeycloakTransactionCommitter</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#RestEasyContext"><span class="toc-text">RestEasyContext</span></a></li></ol>
     
 <style>
     .left-col .switch-btn,
@@ -347,173 +353,109 @@
 </div>
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="准备机器"><a href="#准备机器" class="headerlink" title="准备机器"></a>准备机器</h2><p>官方要求:</p>
-<ul>
-<li>ubuntu16.04+</li>
-<li>内存≥2G</li>
-<li>cpu≥2</li>
-<li>机器间网络互通</li>
-<li>每个节点的hostname,mac地址,product_uuid要唯一.</li>
-<li>swap要禁用.</li>
-</ul>
-<h3 id="规划"><a href="#规划" class="headerlink" title="规划"></a>规划</h3><table>
-<thead>
-<tr>
-<th>ip</th>
-<th>角色</th>
-<th>hostname</th>
-<th>配置</th>
-<th>系统</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td> 192.168.1.36</td>
-<td>master</td>
-<td>node1</td>
-<td>2G/2C</td>
-<td>ubuntu18.04</td>
-</tr>
-<tr>
-<td> 192.168.1.37</td>
-<td>node</td>
-<td>node2</td>
-<td>2G/2C</td>
-<td>ubuntu18.04</td>
-</tr>
-<tr>
-<td> 192.168.1.38</td>
-<td>node</td>
-<td>node3</td>
-<td>2G/2C</td>
-<td>ubuntu18.04</td>
-</tr>
-</tbody>
-</table>
-<p>我使用的是vbox,网络模式使用桥接.安装一个完一个虚拟机之后,复制除另外两个,复制的时候选中”重新初始化所有网卡的MAC地址”<br><img src="/2019/06/24/k8s安装指南/1.png"></p>
-<h3 id="修改主机名称-所有节点"><a href="#修改主机名称-所有节点" class="headerlink" title="修改主机名称(所有节点)"></a>修改主机名称(所有节点)</h3><pre><code class="bash">sudo sed -i &#39;/preserve_hostname: false/c\preserve_hostname: true&#39; /etc/cloud/cloud.cfg &amp;&amp; sudo hostnamectl set-hostname {新hostname}
-</code></pre>
-<p>退出重新登录后hostname就会改变.<br>参考:<a href="https://askubuntu.com/questions/1028633/host-name-reverts-to-old-name-after-reboot-in-18-04-lts" target="_blank" rel="noopener">修改ubuntu18.04hostname</a></p>
-<h3 id="修改为静态地址-所有节点"><a href="#修改为静态地址-所有节点" class="headerlink" title="修改为静态地址(所有节点)"></a>修改为静态地址(所有节点)</h3><ol>
-<li>执行命令<code>sudo vim /etc/netplan/50-cloud-init.yaml</code></li>
-<li>更改配置<pre><code class="yml">network:
-   ethernets:
-       enp0s3:
-           addresses: [192.168.1.37/24] # 静态ip
-           gateway4: 192.168.1.1 # 网关
-           nameservers:
-                   addresses: [192.168.1.254] #DNS
-   version: 2
-</code></pre>
+        <p>分析版本: 10.0.0</p>
+<h2 id="web-xml"><a href="#web-xml" class="headerlink" title="web.xml"></a>web.xml</h2><p><img src="20200508112409320_335053284.png" alt></p>
+<ol>
+<li><p><code>module-name</code>为<em>auth</em>,这就是为什么启动keyloak服务后要通过 <a href="http://domain/auth进行访问应用的原因了" target="_blank" rel="noopener">http://domain/auth进行访问应用的原因了</a>.</p>
 </li>
-<li>使设置生效<code>sudo netplan apply</code></li>
+<li><p>我们发现有一个<code>load-on-startup</code>的servlet声明,这个是restEasy的启动声明,详细请参考<a href="https://docs.jboss.org/resteasy/docs/4.5.3.Final/userguide/html/Installation_Configuration.html#d4e143" target="_blank" rel="noopener">Older servlet containers</a>.</p>
+</li>
 </ol>
-<p>参考 <a href="https://ywnz.com/linuxjc/1491.html" target="_blank" rel="noopener">ubuntu 18.04 netplan yaml配置固定IP地址</a></p>
-<h3 id="关闭swap-所有节点"><a href="#关闭swap-所有节点" class="headerlink" title="关闭swap(所有节点)"></a>关闭swap(所有节点)</h3><p><code>sudo swapoff -a</code><br><code>sudo vim /etc/fstab</code> 注释掉 swap那一行,如下:</p>
-<pre><code>UUID=f229223e-9634-11e9-9470-080027aa5c7f / ext4 defaults 0 0
-#/swap.img    none    swap    sw    0    0  
-</code></pre><h3 id="检查-mac地址-product-uuid-所有节点"><a href="#检查-mac地址-product-uuid-所有节点" class="headerlink" title="检查 mac地址,product_uuid(所有节点)"></a>检查 mac地址,product_uuid(所有节点)</h3><pre><code class="bash">ip link # 查看mac
-sudo cat /sys/class/dmi/id/product_uuid # 查看product_uuid
-</code></pre>
-<p>一般情况下不会冲突.(反正我没遇到这种情况☺)</p>
-<h2 id="安装docker-所有节点"><a href="#安装docker-所有节点" class="headerlink" title="安装docker(所有节点)"></a>安装docker(所有节点)</h2><p>国内网络环境,你懂得.<br>使用阿里云提供的方案快速安装: <code>curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun</code><br><a href="https://yq.aliyun.com/articles/110806" target="_blank" rel="noopener">Docker CE 镜像源站</a></p>
-<p>请自行配置docker镜像加速.</p>
-<h2 id="安装kubeadm-kubelet-and-kubectl-所有节点"><a href="#安装kubeadm-kubelet-and-kubectl-所有节点" class="headerlink" title="安装kubeadm, kubelet and kubectl(所有节点)"></a>安装kubeadm, kubelet and kubectl(所有节点)</h2><p>安装k8s需要安装这三个包:</p>
+<h2 id="WildflyLifecleListener"><a href="#WildflyLifecleListener" class="headerlink" title="WildflyLifecleListener"></a>WildflyLifecleListener</h2><p>里面有个<code>listener</code>声明,实际上启动阶段这个listener什么都没做,到时容器关闭的时候,执行了一个shutdownHook.</p>
+<p><img src="20200508115559301_1073305909.png" alt></p>
+<h2 id="KeycloakApplication"><a href="#KeycloakApplication" class="headerlink" title="KeycloakApplication"></a>KeycloakApplication</h2><p>这个是keycloak启动的入口.</p>
+<div id="flowchart-0" class="flow-chart"></div>
+
+<p>这里的启动hook主要是做一些系统升级相关的逻辑.关联的shutdownhook主要是把之前创建的sessionFactory关掉. 这个shutdownhook实在上一节中提到的<code>WildflyLifecleListener</code>中调用的</p>
+<p>启动过程中不管出现任何异常,keycloak都会直接exit.</p>
+<h2 id="KeycloakSessionServletFilter"><a href="#KeycloakSessionServletFilter" class="headerlink" title="KeycloakSessionServletFilter"></a>KeycloakSessionServletFilter</h2><p>目光再次回到<code>web.xml</code>上来,这里还有一个<code>KeycloakSessionServletFilter</code>,看一下里面的<code>doFilter</code>都做了什么:</p>
+<p><img src="20200508132807887_775282546.png" alt>SessionFactory和</p>
+<div id="flowchart-1" class="flow-chart"></div>
+
+<p>这个filter负责创建session,并且打开事务,当出现异常的时候自动回滚事务.当没又出现异常的时候这个事务是如何提交的呢,继续往下分析.</p>
+<h2 id="KeycloakTransactionCommitter"><a href="#KeycloakTransactionCommitter" class="headerlink" title="KeycloakTransactionCommitter"></a>KeycloakTransactionCommitter</h2><p>在上面的KeycloakApplication的代码分析中有这么一句<code>classes.add(KeycloakTransactionCommitter.class);</code>看名字应该是做事务提交用的.</p>
+<p><img src="20200508135716767_851192680.png" alt></p>
+<p>果真如此,但是它只负责在response阶段提交事务,如果提交事务出现异常的时候会直接将异常抛出,然后由<code>KeycloakSessionServletFilter</code>捕获后做回滚.</p>
+<h2 id="RestEasyContext"><a href="#RestEasyContext" class="headerlink" title="RestEasyContext"></a>RestEasyContext</h2><p>目前已经大该分析完了keycloak的启动过程,启动完成后restEasyContext中被push了下面这些对象,这些对象是可以直接通过注解进行注入的.</p>
 <table>
 <thead>
 <tr>
-<th>名称</th>
-<th>作用 </th>
+<th>序号</th>
+<th>类型</th>
+<th>作用域</th>
+<th>描述</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td> kubeadm</td>
-<td>用来引导集群 </td>
+<td>1</td>
+<td>KeycloakApplication</td>
+<td>gloable</td>
+<td></td>
 </tr>
 <tr>
-<td> kubelet</td>
-<td>在群集中的所有计算机上运行的组件，并执行诸如启动pod和容器之类的操作</td>
+<td>2</td>
+<td>KeycloakApplication</td>
+<td>thread</td>
+<td>for injection</td>
 </tr>
 <tr>
-<td> kubectl</td>
-<td>用来和集群通信的命令行工具</td>
+<td>3</td>
+<td>KeycloakSession</td>
+<td>thread</td>
+<td></td>
+</tr>
+<tr>
+<td>4</td>
+<td>ClientConnection</td>
+<td>thread</td>
+<td></td>
+</tr>
+<tr>
+<td>5</td>
+<td>KeycloakTransaction</td>
+<td>thread</td>
+<td></td>
+<td><script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.2.7/raphael.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/flowchart/1.6.5/flowchart.min.js"></script><textarea id="flowchart-0-code" style="display: none">
+loadConfig=>operation: 加载配置
+
+createSessionFectory=>operation: 创建createSessionFactory并将实例加入servletContext
+
+resteasyContextPush=>operation: 当前keycloakApplication实例加入resteasyContext
+
+addResource=>operation: 添加resource,filter,事务管理,异常处理和资源解析器
+
+addHook=>operation: 执行启动hook,关联shutdownhook
+
+loadConfig->createSessionFectory->resteasyContextPush->addResource->addHook->loadConfig</textarea><textarea id="flowchart-0-options" style="display: none">{"scale":1,"line-width":2,"line-length":50,"text-margin":10,"font-size":12}</textarea><script>  var code = document.getElementById("flowchart-0-code").value;  var options = JSON.parse(decodeURIComponent(document.getElementById("flowchart-0-options").value));  var diagram = flowchart.parse(code);  diagram.drawSVG("flowchart-0", options);</script><textarea id="flowchart-1-code" style="display: none">
+encoding=>operation: 设置请求编码为UTF-8
+
+getSessionFactory=>operation: 从servletRequestContext中取出sessionFactory
+
+createSession=>operation: 创建keycloakSession并push到ResteasyContext
+
+connection=>operation: 由request创建了一个ClientConnection对象并关联到sessionContext和push到resteasyContext
+
+tx=>operation: 从session获取事务管理器实例并push进resteasyContext,然后打开事务
+
+doFilter=>operation: doFilter
+
+exception=>condition: 有异常?
+
+rollbackTx=>operation: 回滚事务
+
+closeSession=>operation: 关闭session
+
+cleanRestEasyContext=>operation: 清理restEasyContextData
+
+encoding->getSessionFactory->createSession->connection->tx->doFilter->exception
+
+exception(yes)->closeSession
+
+exception(no)->rollbackTx->closeSession->cleanRestEasyContext</textarea><textarea id="flowchart-1-options" style="display: none">{"scale":1,"line-width":2,"line-length":50,"text-margin":10,"font-size":12}</textarea><script>  var code = document.getElementById("flowchart-1-code").value;  var options = JSON.parse(decodeURIComponent(document.getElementById("flowchart-1-options").value));  var diagram = flowchart.parse(code);  diagram.drawSVG("flowchart-1", options);</script></td>
 </tr>
 </tbody>
 </table>
-<p>国内网络环境,这回应该懂了吧…</p>
-<pre><code class="bash"># 使用root操作
-sudo su 
-apt-get update &amp;&amp; apt-get install -y apt-transport-https
-curl https://mirrors.aliyun.com/kubernetes/apt/doc/apt-key.gpg | apt-key add - 
-cat &lt;&lt;EOF &gt;/etc/apt/sources.list.d/kubernetes.list
-deb https://mirrors.aliyun.com/kubernetes/apt/ kubernetes-xenial main
-EOF  
-apt-get update
-apt-get install -y kubelet kubeadm kubectl
-</code></pre>
-<h3 id="准备镜像-所有节点"><a href="#准备镜像-所有节点" class="headerlink" title="准备镜像(所有节点)"></a>准备镜像(所有节点)</h3><p>集群初始化的时候需要从k8s.gcr.io拉取镜像,但是国内网络环境,你懂得.</p>
-<ol>
-<li><code>kubeadm config images list</code> 查看使用到的镜像<pre><code>kubeadm config images list
-k8s.gcr.io/kube-apiserver:v1.15.0
-k8s.gcr.io/kube-controller-manager:v1.15.0
-k8s.gcr.io/kube-scheduler:v1.15.0
-k8s.gcr.io/kube-proxy:v1.15.0
-k8s.gcr.io/pause:3.1
-k8s.gcr.io/etcd:3.3.10
-k8s.gcr.io/coredns:1.3.1
-</code></pre></li>
-<li>手动获取一下镜像<pre><code>#上面那一堆复制下来
-images=(
- k8s.gcr.io/kube-apiserver:v1.15.0
- k8s.gcr.io/kube-controller-manager:v1.15.0
- k8s.gcr.io/kube-scheduler:v1.15.0
- k8s.gcr.io/kube-proxy:v1.15.0
- k8s.gcr.io/pause:3.1
- k8s.gcr.io/etcd:3.3.10
- k8s.gcr.io/coredns:1.3.1
-)
-for imageName in ${images[@]} ; do
- imageName=${imageName##*/}
- docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/$imageName
- docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/$imageName k8s.gcr.io/$imageName
- docker rmi registry.cn-hangzhou.aliyuncs.com/google_containers/$imageName
-done 
-</code></pre><h2 id="初始化集群-master节点"><a href="#初始化集群-master节点" class="headerlink" title="初始化集群(master节点)"></a>初始化集群(master节点)</h2></li>
-</ol>
-<pre><code># 因为使用flannel网络插件,需要在kubeadm init 时设置 --pod-network-cidr=10.244.0.0/16
-sudo kubeadm init --pod-network-cidr=10.244.0.0/16
-</code></pre><h2 id="配置授权信息-master节点"><a href="#配置授权信息-master节点" class="headerlink" title="配置授权信息(master节点)"></a>配置授权信息(master节点)</h2><p>集群初始化后有提示</p>
-<pre><code>mkdir -p $HOME/.kube
-sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-sudo chown $(id -u):$(id -g) $HOME/.kube/config
-</code></pre><h2 id="添加网络插件-master节点"><a href="#添加网络插件-master节点" class="headerlink" title="添加网络插件(master节点)"></a>添加网络插件(master节点)</h2><p>执行<code>kubectl get pods -A</code> 会发现coredns状态为pending.以为还没有安装网络插件,所有和网络相关的pod都会为pending.<br>集群初始化完成后也有提示<code>You should now deploy a pod network to the cluster.</code><br>添加网络插件:</p>
-<pre><code>kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
-</code></pre><p>稍等片刻,再次执行 <code>kubectl get pods -A</code> ,所有POD 都running了.</p>
-<h2 id="设置master节点也可以运行Pod"><a href="#设置master节点也可以运行Pod" class="headerlink" title="设置master节点也可以运行Pod"></a>设置master节点也可以运行Pod</h2><p>kubernetes官方默认策略是worker节点运行Pod，master节点不运行Pod。如果只是为了开发或者其他目的而需要部署单节点集群，可以通过以下的命令设置<br><code>kubectl taint nodes --all node-role.kubernetes.io/master-</code></p>
-<h2 id="加入节点-worker节点"><a href="#加入节点-worker节点" class="headerlink" title="加入节点(worker节点)"></a>加入节点(worker节点)</h2><p>集群初始化完成后也有提示:</p>
-<pre><code>Then you can join any number of worker nodes by running the following on each as root:
-kubeadm join 192.168.1.36:6443 --token 9wujqe.xfc5msp9l3i9g9s8 \
-    --discovery-token-ca-cert-hash sha256:1c67699dbf329cceff693a37a6b3f2c4d706901673343a24c872d802a7ed3433
-</code></pre><h2 id="测试一下"><a href="#测试一下" class="headerlink" title="测试一下"></a>测试一下</h2><p>在master执行:</p>
-<pre><code>kubectl get nodes 
-#此时应该有三个节点
-NAME    STATUS   ROLES    AGE    VERSION
-node1   Ready    master   36m    v1.15.0
-node2   Ready    &lt;none&gt;   8m2s   v1.15.0
-node3   Ready    &lt;none&gt;   29s    v1.15.0
-</code></pre><p>创建个deployment试试</p>
-<pre><code>kubectl run my-nginx --image=nginx --replicas=3 --port=80
-# 稍等片刻
-kubectl get pods -o wide
-# 应该这样的
-NAME                        READY   STATUS    RESTARTS   AGE   IP           NODE    NOMINATED NODE   READINESS GATES
-my-nginx-756fb87568-ssxj5   1/1     Running   0          94s   10.244.0.4   node1   &lt;none&gt;           &lt;none&gt;
-my-nginx-756fb87568-x2mtk   1/1     Running   0          94s   10.244.2.2   node3   &lt;none&gt;           &lt;none&gt;
-my-nginx-756fb87568-zkjxj   1/1     Running   0          94s   10.244.1.2   node2   &lt;none&gt;           &lt;none&gt;
-</code></pre><p>创建个service试试</p>
-<pre><code>kubectl expose deployment my-nginx --name=my-nginx --port 80 --target-port 80 --external-ip 192.168.1.36
-</code></pre><p>打开浏览器访问一下 192.168.1.36,nginx首页.<br><img src="/2019/06/24/k8s安装指南/2.png"><br>可以愉快的玩耍了.</p>
 
       
        <hr><span style="font-style: italic;color: gray;"> 转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。可以在下面评论区评论，也可以邮件至 wzslw@163.com </span>
@@ -527,12 +469,12 @@ my-nginx-756fb87568-zkjxj   1/1     Running   0          94s   10.244.1.2   node
 
 
 <div class="article_copyright">
-    <p><span>文章标题:</span>k8s安装指南</p>
-    <p><span>文章字数:</span><span class="post-count">1.3k</span></p>
+    <p><span>文章标题:</span>keycloak源码分析-启动</p>
+    <p><span>文章字数:</span><span class="post-count">677</span></p>
     <p><span>本文作者:</span><a href="javascript:void(0)" title="武继明">武继明</a></p>
-    <p><span>发布时间:</span>2019-06-24, 15:33:49</p>
-    <p><span>最后更新:</span>2019-06-25, 12:01:52</p>
-    <span>原始链接:</span><a class="post-url" href="/2019/06/24/k8s安装指南/" title="k8s安装指南">https://www.omingo.com/2019/06/24/k8s安装指南/</a>
+    <p><span>发布时间:</span>2020-05-09, 18:12:34</p>
+    <p><span>最后更新:</span>2020-05-09, 18:23:18</p>
+    <span>原始链接:</span><a class="post-url" href="/2020/05/09/keycloak源码分析-启动/" title="keycloak源码分析-启动">https://www.omingo.com/2020/05/09/keycloak源码分析-启动/</a>
     <p>
         <span>版权声明:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target="_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
     </p>
@@ -550,7 +492,7 @@ my-nginx-756fb87568-zkjxj   1/1     Running   0          94s   10.244.1.2   node
             repo: 'omingo-cn',
             owner: 'omingo-cn',
             admin: ['wzslw'],
-            id: 'Mon Jun 24 2019 15:33:49 GMT+0800',
+            id: 'Sat May 09 2020 18:12:34 GMT+0800',
             distractionFreeMode: 'true',
             language: 'zh-CN',
             perPage: parseInt('10',10)
