@@ -2,9 +2,9 @@
 <html>
 <head><meta name="generator" content="Hexo 3.8.0">
   <meta charset="utf-8">
-  <title>keycloak-调整日志打印级别 | 猿明园</title>
-  <meta name="keywords" content=" keycloak , 日志 ">
-  <meta name="description" content="keycloak-调整日志打印级别 | 猿明园">
+  <title>keycloak-mybatis整合 | 猿明园</title>
+  <meta name="keywords" content=" keycloak ">
+  <meta name="description" content="keycloak-mybatis整合 | 猿明园">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="description" content="页面未找到！">
 <meta property="og:type" content="website">
@@ -315,9 +315,9 @@
 </aside>
 <div class="post">
     <div class="pjax">
-        <article id="post-keycloak-调整日志打印级别" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-keycloak-mybatis整合" class="article article-type-post" itemscope itemprop="blogPost">
     
-        <h1 class="article-title">keycloak-调整日志打印级别</h1>
+        <h1 class="article-title">keycloak-mybatis整合</h1>
     
     <div class="article-meta">
         
@@ -334,19 +334,17 @@
             
             <a href="javascript:" class="color4">keycloak</a>
             
-            <a href="javascript:" class="color3">日志</a>
-            
         </span>
         
     </div>
     <div class="article-meta">
         
-        创建时间:<time class="date" title="更新时间: 2020-05-09 18:37:41">2020-05-09 18:33</time>
+        创建时间:<time class="date" title="更新时间: 2020-06-08 14:40:12">2020-06-08 14:39</time>
         
     </div>
     <div class="article-meta">
         
-        <span>字数:390</span>
+        <span>字数:675</span>
         
         
         <span id="busuanzi_container_page_pv">
@@ -365,7 +363,7 @@
     
     <div class="toc-ref">
     
-        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#keycloak-调整日志打印级别"><span class="toc-text">keycloak-调整日志打印级别</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#keycloak-整合mybatis"><span class="toc-text">keycloak-整合mybatis</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#依赖-配置"><span class="toc-text">依赖\配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#UserStorageProviderFactory"><span class="toc-text">UserStorageProviderFactory</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MybatisUserStorageProvider"><span class="toc-text">MybatisUserStorageProvider</span></a></li></ol></li></ol>
     
 <style>
     .left-col .switch-btn,
@@ -380,54 +378,154 @@
 </div>
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="keycloak-调整日志打印级别"><a href="#keycloak-调整日志打印级别" class="headerlink" title="keycloak-调整日志打印级别"></a>keycloak-调整日志打印级别</h1><p>在开发环境中我们需要调整一下keycloak的日志打印级别,以便我们更方便的了解系统内部执行的情况.</p>
-<p>在<code>standalon.xml</code>搜索<em>urn:jboss:domain:logging</em>,然后修改为:</p>
-<pre><code class="xml">        &lt;subsystem xmlns=&quot;urn:jboss:domain:logging:8.0&quot;&gt;
-            &lt;console-handler name=&quot;CONSOLE&quot;&gt;
-                &lt;level name=&quot;DEBUG&quot;/&gt; &lt;!--修改控制台打印级别问题DEBUG--&gt;
-                &lt;formatter&gt;
-                    &lt;named-formatter name=&quot;COLOR-PATTERN&quot;/&gt;
-                &lt;/formatter&gt;
-            &lt;/console-handler&gt;
-            &lt;periodic-rotating-file-handler name=&quot;FILE&quot; autoflush=&quot;true&quot;&gt;
-                &lt;formatter&gt;
-                    &lt;named-formatter name=&quot;PATTERN&quot;/&gt;
-                &lt;/formatter&gt;
-                &lt;file relative-to=&quot;jboss.server.log.dir&quot; path=&quot;server.log&quot;/&gt;
-                &lt;suffix value=&quot;.yyyy-MM-dd&quot;/&gt;
-                &lt;append value=&quot;true&quot;/&gt;
-            &lt;/periodic-rotating-file-handler&gt;
-            &lt;logger category=&quot;com.arjuna&quot;&gt;
-                &lt;level name=&quot;WARN&quot;/&gt;
-            &lt;/logger&gt;
-            &lt;logger category=&quot;io.jaegertracing.Configuration&quot;&gt;
-                &lt;level name=&quot;WARN&quot;/&gt;
-            &lt;/logger&gt;
-            &lt;logger category=&quot;org.jboss.as.config&quot;&gt;
-                &lt;level name=&quot;DEBUG&quot;/&gt;
-            &lt;/logger&gt;
-            &lt;logger category=&quot;sun.rmi&quot;&gt;
-                &lt;level name=&quot;WARN&quot;/&gt;
-            &lt;/logger&gt;
-            &lt;logger category=&quot;org.keycloak&quot;&gt; &lt;!--增加keycloak logger--&gt;
-                &lt;level name=&quot;DEBUG&quot;/&gt;
-            &lt;/logger&gt;            
-            &lt;root-logger&gt;
-                &lt;level name=&quot;INFO&quot;/&gt;
-                &lt;handlers&gt;
-                    &lt;handler name=&quot;CONSOLE&quot;/&gt;
-                    &lt;handler name=&quot;FILE&quot;/&gt;
-                &lt;/handlers&gt;
-            &lt;/root-logger&gt;
-            &lt;formatter name=&quot;PATTERN&quot;&gt;
-                &lt;pattern-formatter pattern=&quot;%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n&quot;/&gt;
-            &lt;/formatter&gt;
-            &lt;formatter name=&quot;COLOR-PATTERN&quot;&gt;
-                &lt;pattern-formatter pattern=&quot;%K{level}%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n&quot;/&gt;
-            &lt;/formatter&gt;
-        &lt;/subsystem&gt;
+        <h1 id="keycloak-整合mybatis"><a href="#keycloak-整合mybatis" class="headerlink" title="keycloak-整合mybatis"></a>keycloak-整合mybatis</h1><p>为方便一些不会jpa的同学，特意整理了一下与mybatis的结合使用方式。</p>
+<p>放码过来。</p>
+<h2 id="依赖-配置"><a href="#依赖-配置" class="headerlink" title="依赖\配置"></a>依赖\配置</h2><p>数据源配置参考： <a href="https://www.omingo.cn/2020/05/11/keycloak-多数据源配置/" target="_blank" rel="noopener">keycloak-多数据源配置</a><br>maven 依赖和打包配置。<br><code>pom.xml</code></p>
+<pre><code class="xml">&lt;!--...--&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.mybatis&lt;/groupId&gt;
+      &lt;artifactId&gt;mybatis&lt;/artifactId&gt;
+      &lt;version&gt;3.5.4&lt;/version&gt;
+    &lt;/dependency&gt;
+&lt;!--...--&gt;
+ &lt;plugin&gt;
+        &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+        &lt;artifactId&gt;maven-war-plugin&lt;/artifactId&gt;
+        &lt;version&gt;3.2.3&lt;/version&gt;
+        &lt;configuration&gt;
+          &lt;failOnMissingWebXml&gt;false&lt;/failOnMissingWebXml&gt;
+
+          &lt;webResources&gt;
+            &lt;resource&gt;
+              &lt;directory&gt;${project.build.directory}/classes/META-INF/services&lt;/directory&gt;
+              &lt;targetPath&gt;META-INF/services&lt;/targetPath&gt;
+              &lt;includes&gt;
+                &lt;include&gt;*.*&lt;/include&gt;
+              &lt;/includes&gt;
+            &lt;/resource&gt;
+            &lt;resource&gt;
+              &lt;directory&gt;src/main/java&lt;/directory&gt;
+              &lt;targetPath&gt;WEB-INF/classes&lt;/targetPath&gt;
+              &lt;includes&gt;
+                &lt;include&gt;**/*Mapper.xml&lt;/include&gt;&lt;!--关键点--&gt;
+              &lt;/includes&gt;
+              &lt;filtering&gt;true&lt;/filtering&gt;
+            &lt;/resource&gt;
+          &lt;/webResources&gt;
+        &lt;/configuration&gt;
+      &lt;/plugin&gt;
+     &lt;!--...--&gt; 
 </code></pre>
-<p>结果:<br><img src="20200509104304377_598798424.png" alt></p>
+<p><code>resources/META-INF</code>加入<code>mybatisconfig.xml</code>配置文件：</p>
+<pre><code class="xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
+&lt;!DOCTYPE configuration
+  PUBLIC &quot;-//mybatis.org//DTD Config 3.0//EN&quot;
+  &quot;http://mybatis.org/dtd/mybatis-3-config.dtd&quot;&gt;
+&lt;configuration&gt;
+  &lt;environments default=&quot;development&quot;&gt;
+    &lt;environment id=&quot;development&quot;&gt;
+      &lt;transactionManager type=&quot;MANAGED&quot;/&gt;
+      &lt;dataSource type=&quot;JNDI&quot;&gt;
+        &lt;property name=&quot;data_source&quot; value=&quot;java:jboss/datasources/DapengXADS&quot;/&gt;&lt;!--自定义数据源名称要一致--&gt;
+      &lt;/dataSource&gt;
+    &lt;/environment&gt;
+  &lt;/environments&gt;
+  &lt;mappers&gt;
+    &lt;mapper resource=&quot;com/dapeng/cloud/models/mybatis/UserMapper.xml&quot;/&gt;
+  &lt;/mappers&gt;
+&lt;/configuration&gt;
+
+</code></pre>
+<h2 id="UserStorageProviderFactory"><a href="#UserStorageProviderFactory" class="headerlink" title="UserStorageProviderFactory"></a>UserStorageProviderFactory</h2><pre><code class="java">@JBossLog
+@AutoService(MybatisStorageProviderFactory.class)
+public class MybatisStorageProviderFactory implements UserStorageProviderFactory&lt;DapengUserStorageProvider&gt;{
+  private static final String PROVIDER_NAME=&quot;dapeng-jdbc&quot;;
+  private static final String MYBATIS_CONFIG=&quot;META-INF/mybatis-config.xml&quot;;
+  private SqlSessionFactory sqlSessionFactory;
+
+  @Override
+  public void init(Scope config) {
+    try {
+      InputStream in = Resources.getResourceAsStream(MYBATIS_CONFIG);
+      sqlSessionFactory=new SqlSessionFactoryBuilder().build(in);
+    } catch (IOException e) {
+      log.error(&quot;创建sqlSessionFactory失败&quot;,e);
+      e.printStackTrace();
+    }
+
+  }
+
+  public String getId() {
+    return PROVIDER_NAME;
+  }
+
+  public MybatisUserStorageProvider create(KeycloakSession keycloakSession, ComponentModel componentModel) {
+
+      return new MybatisUserStorageProvider(keycloakSession,componentModel,sqlSessionFactory.openSession());
+  }
+
+}
+
+</code></pre>
+<h2 id="MybatisUserStorageProvider"><a href="#MybatisUserStorageProvider" class="headerlink" title="MybatisUserStorageProvider"></a>MybatisUserStorageProvider</h2><pre><code class="java">@JBossLog
+@Data
+@AllArgsConstructor
+public class DapengUserStorageProvider implements UserStorageProvider, UserLookupProvider,
+  CredentialInputValidator {
+  private  KeycloakSession session;
+  private  ComponentModel componentModel;
+  private SqlSession sqlSession;
+
+  @Override
+  public UserModel getUserById(String id,
+    RealmModel realmModel) {
+    User user = (User)sqlSession.selectOne(&quot;com.dapeng.cloud.models.mybatis.UserMapper.findById&quot;, id);
+    log.debugv(&quot;用户:{0}&quot;,user);
+    return new UserAdapter(session,realmModel,componentModel,user);
+  }
+
+  @Override
+  public UserModel getUserByUsername(String username, RealmModel realmModel) {
+    log.debugv(&quot;获取用户信息 用户名:{0},域:{1}&quot;,username,realmModel.getName());
+    User user =(User)sqlSession.selectOne(&quot;com.dapeng.cloud.models.mybatis.UserMapper.findByMobile&quot;, username);
+
+    return new UserAdapter(session,realmModel, componentModel,user);
+  }
+
+  @Override
+  public UserModel getUserByEmail(String s, RealmModel realmModel) {
+    return null;
+  }
+
+  @Override
+  public boolean supportsCredentialType(String credentialType) {
+    return PasswordCredentialModel.TYPE.equals(credentialType);
+  }
+
+  @Override
+  public boolean isConfiguredFor(RealmModel realm, UserModel user, String credentialType) {
+    return PasswordCredentialModel.TYPE.equals(credentialType)&amp;&amp;user instanceof UserAdapter;
+  }
+
+  @Override
+  public boolean isValid(RealmModel realm, UserModel user,
+    CredentialInput credentialInput) {
+    if (!supportsCredentialType(credentialInput.getType())) return false;
+    String in = credentialInput.getChallengeResponse();
+    log.infof(&quot;input password: %s ,&quot;, in);
+
+    return &quot;123456&quot;.equals(in);
+  }
+
+  @Override
+  public void close() {
+
+  }
+}
+
+</code></pre>
+<p>剩下的就是mybatis的常规操作了，这里不在赘述。</p>
+<p>有问题请留言。</p>
 
       
        <hr><span style="font-style: italic;color: gray;"> 转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。可以在下面评论区评论，也可以邮件至 wzslw@163.com </span>
@@ -441,12 +539,12 @@
 
 
 <div class="article_copyright">
-    <p><span>文章标题:</span>keycloak-调整日志打印级别</p>
-    <p><span>文章字数:</span><span class="post-count">390</span></p>
+    <p><span>文章标题:</span>keycloak-mybatis整合</p>
+    <p><span>文章字数:</span><span class="post-count">675</span></p>
     <p><span>本文作者:</span><a href="javascript:void(0)" title="武继明">武继明</a></p>
-    <p><span>发布时间:</span>2020-05-09, 18:33:37</p>
-    <p><span>最后更新:</span>2020-05-09, 18:37:41</p>
-    <span>原始链接:</span><a class="post-url" href="/2020/05/09/keycloak-调整日志打印级别/" title="keycloak-调整日志打印级别">https://www.omingo.com/2020/05/09/keycloak-调整日志打印级别/</a>
+    <p><span>发布时间:</span>2020-06-08, 14:39:23</p>
+    <p><span>最后更新:</span>2020-06-08, 14:40:12</p>
+    <span>原始链接:</span><a class="post-url" href="/2020/06/08/keycloak-mybatis整合/" title="keycloak-mybatis整合">https://www.omingo.com/2020/06/08/keycloak-mybatis整合/</a>
     <p>
         <span>版权声明:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target="_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
     </p>
@@ -464,7 +562,7 @@
             repo: 'omingo-cn',
             owner: 'omingo-cn',
             admin: ['wzslw'],
-            id: 'Sat May 09 2020 18:33:37 GMT+0800',
+            id: 'Mon Jun 08 2020 14:39:23 GMT+0800',
             distractionFreeMode: 'true',
             language: 'zh-CN',
             perPage: parseInt('10',10)

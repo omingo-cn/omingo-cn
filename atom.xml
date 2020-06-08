@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://www.omingo.com/"/>
-  <updated>2020-06-08T05:46:24.887Z</updated>
+  <updated>2020-06-08T06:40:12.347Z</updated>
   <id>https://www.omingo.com/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>keycloak-mybatis整合</title>
+    <link href="https://www.omingo.com/2020/06/08/keycloak-mybatis%E6%95%B4%E5%90%88/"/>
+    <id>https://www.omingo.com/2020/06/08/keycloak-mybatis整合/</id>
+    <published>2020-06-08T06:39:23.000Z</published>
+    <updated>2020-06-08T06:40:12.347Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="keycloak-整合mybatis"><a href="#keycloak-整合mybatis" class="headerlink" title="keycloak-整合mybatis"></a>keycloak-整合mybatis</h1><p>为方便一些不会jpa的同学，特意整理了一下与mybatis的结合使用方式。</p><p>放码过来。</p><h2 id="依赖-配置"><a href="#依赖-配置" class="headerlink" title="依赖\配置"></a>依赖\配置</h2><p>数据源配置参考： <a href="https://www.omingo.cn/2020/05/11/keycloak-多数据源配置/" target="_blank" rel="noopener">keycloak-多数据源配置</a><br>maven 依赖和打包配置。<br><code>pom.xml</code></p><pre><code class="xml">&lt;!--...--&gt;    &lt;dependency&gt;      &lt;groupId&gt;org.mybatis&lt;/groupId&gt;      &lt;artifactId&gt;mybatis&lt;/artifactId&gt;      &lt;version&gt;3.5.4&lt;/version&gt;    &lt;/dependency&gt;&lt;!--...--&gt; &lt;plugin&gt;        &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;        &lt;artifactId&gt;maven-war-plugin&lt;/artifactId&gt;        &lt;version&gt;3.2.3&lt;/version&gt;        &lt;configuration&gt;          &lt;failOnMissingWebXml&gt;false&lt;/failOnMissingWebXml&gt;          &lt;webResources&gt;            &lt;resource&gt;              &lt;directory&gt;${project.build.directory}/classes/META-INF/services&lt;/directory&gt;              &lt;targetPath&gt;META-INF/services&lt;/targetPath&gt;              &lt;includes&gt;                &lt;include&gt;*.*&lt;/include&gt;              &lt;/includes&gt;            &lt;/resource&gt;            &lt;resource&gt;              &lt;directory&gt;src/main/java&lt;/directory&gt;              &lt;targetPath&gt;WEB-INF/classes&lt;/targetPath&gt;              &lt;includes&gt;                &lt;include&gt;**/*Mapper.xml&lt;/include&gt;&lt;!--关键点--&gt;              &lt;/includes&gt;              &lt;filtering&gt;true&lt;/filtering&gt;            &lt;/resource&gt;          &lt;/webResources&gt;        &lt;/configuration&gt;      &lt;/plugin&gt;     &lt;!--...--&gt; </code></pre><p><code>resources/META-INF</code>加入<code>mybatisconfig.xml</code>配置文件：</p><pre><code class="xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;&lt;!DOCTYPE configuration  PUBLIC &quot;-//mybatis.org//DTD Config 3.0//EN&quot;  &quot;http://mybatis.org/dtd/mybatis-3-config.dtd&quot;&gt;&lt;configuration&gt;  &lt;environments default=&quot;development&quot;&gt;    &lt;environment id=&quot;development&quot;&gt;      &lt;transactionManager type=&quot;MANAGED&quot;/&gt;      &lt;dataSource type=&quot;JNDI&quot;&gt;        &lt;property name=&quot;data_source&quot; value=&quot;java:jboss/datasources/DapengXADS&quot;/&gt;&lt;!--自定义数据源名称要一致--&gt;      &lt;/dataSource&gt;    &lt;/environment&gt;  &lt;/environments&gt;  &lt;mappers&gt;    &lt;mapper resource=&quot;com/dapeng/cloud/models/mybatis/UserMapper.xml&quot;/&gt;  &lt;/mappers&gt;&lt;/configuration&gt;</code></pre><h2 id="UserStorageProviderFactory"><a href="#UserStorageProviderFactory" class="headerlink" title="UserStorageProviderFactory"></a>UserStorageProviderFactory</h2><pre><code class="java">@JBossLog@AutoService(MybatisStorageProviderFactory.class)public class MybatisStorageProviderFactory implements UserStorageProviderFactory&lt;DapengUserStorageProvider&gt;{  private static final String PROVIDER_NAME=&quot;dapeng-jdbc&quot;;  private static final String MYBATIS_CONFIG=&quot;META-INF/mybatis-config.xml&quot;;  private SqlSessionFactory sqlSessionFactory;  @Override  public void init(Scope config) {    try {      InputStream in = Resources.getResourceAsStream(MYBATIS_CONFIG);      sqlSessionFactory=new SqlSessionFactoryBuilder().build(in);    } catch (IOException e) {      log.error(&quot;创建sqlSessionFactory失败&quot;,e);      e.printStackTrace();    }  }  public String getId() {    return PROVIDER_NAME;  }  public MybatisUserStorageProvider create(KeycloakSession keycloakSession, ComponentModel componentModel) {      return new MybatisUserStorageProvider(keycloakSession,componentModel,sqlSessionFactory.openSession());  }}</code></pre><h2 id="MybatisUserStorageProvider"><a href="#MybatisUserStorageProvider" class="headerlink" title="MybatisUserStorageProvider"></a>MybatisUserStorageProvider</h2><pre><code class="java">@JBossLog@Data@AllArgsConstructorpublic class DapengUserStorageProvider implements UserStorageProvider, UserLookupProvider,  CredentialInputValidator {  private  KeycloakSession session;  private  ComponentModel componentModel;  private SqlSession sqlSession;  @Override  public UserModel getUserById(String id,    RealmModel realmModel) {    User user = (User)sqlSession.selectOne(&quot;com.dapeng.cloud.models.mybatis.UserMapper.findById&quot;, id);    log.debugv(&quot;用户:{0}&quot;,user);    return new UserAdapter(session,realmModel,componentModel,user);  }  @Override  public UserModel getUserByUsername(String username, RealmModel realmModel) {    log.debugv(&quot;获取用户信息 用户名:{0},域:{1}&quot;,username,realmModel.getName());    User user =(User)sqlSession.selectOne(&quot;com.dapeng.cloud.models.mybatis.UserMapper.findByMobile&quot;, username);    return new UserAdapter(session,realmModel, componentModel,user);  }  @Override  public UserModel getUserByEmail(String s, RealmModel realmModel) {    return null;  }  @Override  public boolean supportsCredentialType(String credentialType) {    return PasswordCredentialModel.TYPE.equals(credentialType);  }  @Override  public boolean isConfiguredFor(RealmModel realm, UserModel user, String credentialType) {    return PasswordCredentialModel.TYPE.equals(credentialType)&amp;&amp;user instanceof UserAdapter;  }  @Override  public boolean isValid(RealmModel realm, UserModel user,    CredentialInput credentialInput) {    if (!supportsCredentialType(credentialInput.getType())) return false;    String in = credentialInput.getChallengeResponse();    log.infof(&quot;input password: %s ,&quot;, in);    return &quot;123456&quot;.equals(in);  }  @Override  public void close() {  }}</code></pre><p>剩下的就是mybatis的常规操作了，这里不在赘述。</p><p>有问题请留言。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h1 id=&quot;keycloak-整合mybatis&quot;&gt;&lt;a href=&quot;#keycloak-整合mybatis&quot; class=&quot;headerlink&quot; title=&quot;keycloak-整合mybatis&quot;&gt;&lt;/a&gt;keycloak-整合mybatis&lt;/h1&gt;&lt;p&gt;为方便一些不
+      
+    
+    </summary>
+    
+      <category term="Keycloak" scheme="https://www.omingo.com/categories/Keycloak/"/>
+    
+    
+      <category term="keycloak" scheme="https://www.omingo.com/tags/keycloak/"/>
+    
+  </entry>
   
   <entry>
     <title>keycloak-用户session数量限制</title>
