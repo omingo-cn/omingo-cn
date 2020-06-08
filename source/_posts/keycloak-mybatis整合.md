@@ -116,7 +116,7 @@ public class MybatisStorageProviderFactory implements UserStorageProviderFactory
 @JBossLog
 @Data
 @AllArgsConstructor
-public class DapengUserStorageProvider implements UserStorageProvider, UserLookupProvider,
+public class MybatisUserStorageProvider implements UserStorageProvider, UserLookupProvider,
   CredentialInputValidator {
   private  KeycloakSession session;
   private  ComponentModel componentModel;
