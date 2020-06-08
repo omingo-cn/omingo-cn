@@ -2,9 +2,9 @@
 <html>
 <head><meta name="generator" content="Hexo 3.8.0">
   <meta charset="utf-8">
-  <title>keycloak-调整日志打印级别 | 猿明园</title>
-  <meta name="keywords" content=" keycloak , 日志 ">
-  <meta name="description" content="keycloak-调整日志打印级别 | 猿明园">
+  <title>keycloak-用户session数量限制 | 猿明园</title>
+  <meta name="keywords" content=" keycloak ">
+  <meta name="description" content="keycloak-用户session数量限制 | 猿明园">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="description" content="页面未找到！">
 <meta property="og:type" content="website">
@@ -310,9 +310,9 @@
 </aside>
 <div class="post">
     <div class="pjax">
-        <article id="post-keycloak-调整日志打印级别" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-keycloak-用户session数量限制" class="article article-type-post" itemscope itemprop="blogPost">
     
-        <h1 class="article-title">keycloak-调整日志打印级别</h1>
+        <h1 class="article-title">keycloak-用户session数量限制</h1>
     
     <div class="article-meta">
         
@@ -329,19 +329,17 @@
             
             <a href="javascript:" class="color4">keycloak</a>
             
-            <a href="javascript:" class="color3">日志</a>
-            
         </span>
         
     </div>
     <div class="article-meta">
         
-        创建时间:<time class="date" title="更新时间: 2020-05-09 18:37:41">2020-05-09 18:33</time>
+        创建时间:<time class="date" title="更新时间: 2020-06-08 13:46:24">2020-06-08 13:40</time>
         
     </div>
     <div class="article-meta">
         
-        <span>字数:390</span>
+        <span>字数:891</span>
         
         
         <span id="busuanzi_container_page_pv">
@@ -360,7 +358,7 @@
     
     <div class="toc-ref">
     
-        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#keycloak-调整日志打印级别"><span class="toc-text">keycloak-调整日志打印级别</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#session并发限制"><span class="toc-text">session并发限制</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#代码"><span class="toc-text">代码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用"><span class="toc-text">使用</span></a></li></ol></li></ol>
     
 <style>
     .left-col .switch-btn,
@@ -375,54 +373,241 @@
 </div>
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="keycloak-调整日志打印级别"><a href="#keycloak-调整日志打印级别" class="headerlink" title="keycloak-调整日志打印级别"></a>keycloak-调整日志打印级别</h1><p>在开发环境中我们需要调整一下keycloak的日志打印级别,以便我们更方便的了解系统内部执行的情况.</p>
-<p>在<code>standalon.xml</code>搜索<em>urn:jboss:domain:logging</em>,然后修改为:</p>
-<pre><code class="xml">        &lt;subsystem xmlns=&quot;urn:jboss:domain:logging:8.0&quot;&gt;
-            &lt;console-handler name=&quot;CONSOLE&quot;&gt;
-                &lt;level name=&quot;DEBUG&quot;/&gt; &lt;!--修改控制台打印级别问题DEBUG--&gt;
-                &lt;formatter&gt;
-                    &lt;named-formatter name=&quot;COLOR-PATTERN&quot;/&gt;
-                &lt;/formatter&gt;
-            &lt;/console-handler&gt;
-            &lt;periodic-rotating-file-handler name=&quot;FILE&quot; autoflush=&quot;true&quot;&gt;
-                &lt;formatter&gt;
-                    &lt;named-formatter name=&quot;PATTERN&quot;/&gt;
-                &lt;/formatter&gt;
-                &lt;file relative-to=&quot;jboss.server.log.dir&quot; path=&quot;server.log&quot;/&gt;
-                &lt;suffix value=&quot;.yyyy-MM-dd&quot;/&gt;
-                &lt;append value=&quot;true&quot;/&gt;
-            &lt;/periodic-rotating-file-handler&gt;
-            &lt;logger category=&quot;com.arjuna&quot;&gt;
-                &lt;level name=&quot;WARN&quot;/&gt;
-            &lt;/logger&gt;
-            &lt;logger category=&quot;io.jaegertracing.Configuration&quot;&gt;
-                &lt;level name=&quot;WARN&quot;/&gt;
-            &lt;/logger&gt;
-            &lt;logger category=&quot;org.jboss.as.config&quot;&gt;
-                &lt;level name=&quot;DEBUG&quot;/&gt;
-            &lt;/logger&gt;
-            &lt;logger category=&quot;sun.rmi&quot;&gt;
-                &lt;level name=&quot;WARN&quot;/&gt;
-            &lt;/logger&gt;
-            &lt;logger category=&quot;org.keycloak&quot;&gt; &lt;!--增加keycloak logger--&gt;
-                &lt;level name=&quot;DEBUG&quot;/&gt;
-            &lt;/logger&gt;            
-            &lt;root-logger&gt;
-                &lt;level name=&quot;INFO&quot;/&gt;
-                &lt;handlers&gt;
-                    &lt;handler name=&quot;CONSOLE&quot;/&gt;
-                    &lt;handler name=&quot;FILE&quot;/&gt;
-                &lt;/handlers&gt;
-            &lt;/root-logger&gt;
-            &lt;formatter name=&quot;PATTERN&quot;&gt;
-                &lt;pattern-formatter pattern=&quot;%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n&quot;/&gt;
-            &lt;/formatter&gt;
-            &lt;formatter name=&quot;COLOR-PATTERN&quot;&gt;
-                &lt;pattern-formatter pattern=&quot;%K{level}%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n&quot;/&gt;
-            &lt;/formatter&gt;
-        &lt;/subsystem&gt;
+        <h1 id="session并发限制"><a href="#session并发限制" class="headerlink" title="session并发限制"></a>session并发限制</h1><p>有时候需要限制用户同时在线的数量，就像微信一样同一时间只能有一个手机能够登陆上。</p>
+<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><p>废话不多说，直接放码,要的拿去。</p>
+<p><code>UserSessionLimitsAuthenticatorFactory.java</code></p>
+<pre><code class="java">
+@AutoService(AuthenticatorFactory.class)
+public class UserSessionLimitsAuthenticatorFactory implements AuthenticatorFactory {
+
+  public static final String USER_REALM_LIMIT = &quot;userRealmLimit&quot;;
+  public static final String USER_CLIENT_LIMIT = &quot;userClientLimit&quot;;
+  public static final String BEHAVIOR = &quot;behavior&quot;;
+  public static final String DENY_NEW_SESSION = &quot;Deny new session&quot;;
+  public static final String TERMINATE_OLDEST_SESSION = &quot;Terminate oldest session&quot;;
+  public static final String USER_SESSION_LIMITS = &quot;user-session-limits&quot;;
+
+
+  private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
+    AuthenticationExecutionModel.Requirement.REQUIRED,
+    AuthenticationExecutionModel.Requirement.DISABLED
+  };
+
+  @Override
+  public String getDisplayType() {
+    return &quot;User session count limiter&quot;;
+  }
+
+  @Override
+  public String getReferenceCategory() {
+    return null;
+  }
+
+  @Override
+  public boolean isConfigurable() {
+    return true;
+  }
+
+  @Override
+  public AuthenticationExecutionModel.Requirement[] getRequirementChoices() {
+    return REQUIREMENT_CHOICES.clone();
+  }
+
+  @Override
+  public boolean isUserSetupAllowed() {
+    return false;
+  }
+
+  @Override
+  public String getHelpText() {
+    return &quot;Configures how many concurrent sessions a single user is allowed to create for this realm and/or client&quot;;
+  }
+
+  @Override
+  public List&lt;ProviderConfigProperty&gt; getConfigProperties() {
+    ProviderConfigProperty userRealmLimit = new ProviderConfigProperty();
+    userRealmLimit.setName(USER_REALM_LIMIT);
+    userRealmLimit.setLabel(&quot;Maximum concurrent sessions for each user&quot;);
+    userRealmLimit.setType(ProviderConfigProperty.STRING_TYPE);
+
+    ProviderConfigProperty userClientLimit = new ProviderConfigProperty();
+    userClientLimit.setName(USER_CLIENT_LIMIT);
+    userClientLimit.setLabel(&quot;Maximum concurrent sessions for each user per keycloak client&quot;);
+    userClientLimit.setType(ProviderConfigProperty.STRING_TYPE);
+
+    ProviderConfigProperty behaviourProperty = new ProviderConfigProperty();
+    behaviourProperty.setName(BEHAVIOR);
+    behaviourProperty.setLabel(&quot;Behavior when user session limit is exceeded&quot;);
+    behaviourProperty.setType(ProviderConfigProperty.LIST_TYPE);
+    behaviourProperty.setDefaultValue(DENY_NEW_SESSION);
+    behaviourProperty.setOptions(Arrays.asList(DENY_NEW_SESSION, TERMINATE_OLDEST_SESSION));
+
+    return Arrays.asList(userRealmLimit, userClientLimit, behaviourProperty);
+  }
+
+  @Override
+  public Authenticator create(KeycloakSession keycloakSession) {
+    return new UserSessionLimitsAuthenticator(keycloakSession);
+  }
+
+  @Override
+  public void init(Config.Scope scope) {
+    // Do nothing
+  }
+
+  @Override
+  public void postInit(KeycloakSessionFactory keycloakSessionFactory) {
+    // Do nothing
+  }
+
+  @Override
+  public void close() {
+    // Do nothing
+  }
+
+  @Override
+  public String getId() {
+    return USER_SESSION_LIMITS;
+  }
+}
+
 </code></pre>
-<p>结果:<br><img src="20200509104304377_598798424.png" alt></p>
+<p><code>AbstractSessionLimitsAuthenticator.java</code></p>
+<pre><code class="java">public abstract class AbstractSessionLimitsAuthenticator implements Authenticator {
+
+  protected KeycloakSession session;
+
+  protected boolean exceedsLimit(long count, long limit) {
+    if (limit &lt; 0) { // if limit is negative, no valid limit configuration is found
+      return false;
+    }
+    return count &gt; limit - 1;
+  }
+
+  protected int getIntConfigProperty(String key, Map&lt;String, String&gt; config) {
+    String value = config.get(key);
+    if (StringUtils.isBlank(value)) {
+      return -1;
+    }
+    return Integer.parseInt(value);
+  }
+
+  @Override
+  public void action(AuthenticationFlowContext context) {
+
+  }
+
+  @Override
+  public boolean requiresUser() {
+    return false;
+  }
+
+  @Override
+  public boolean configuredFor(KeycloakSession session, RealmModel realm, UserModel user) {
+    return true;
+  }
+
+  @Override
+  public void setRequiredActions(KeycloakSession session, RealmModel realm, UserModel user) {
+  }
+
+  @Override
+  public void close() {
+
+  }
+}
+
+</code></pre>
+<p><code>UserSessionLimitsAuthenticator.java</code></p>
+<pre><code class="java">@JBossLog
+public class UserSessionLimitsAuthenticator extends AbstractSessionLimitsAuthenticator {
+
+  String behavior;
+
+  public UserSessionLimitsAuthenticator(KeycloakSession session) {
+    this.session = session;
+  }
+
+  @Override
+  public void authenticate(AuthenticationFlowContext context) {
+    AuthenticatorConfigModel authenticatorConfig = context.getAuthenticatorConfig();
+    Map&lt;String, String&gt; config = authenticatorConfig.getConfig();
+
+    // Get the configuration for this authenticator
+    behavior = config.get(UserSessionLimitsAuthenticatorFactory.BEHAVIOR);
+    int userRealmLimit = getIntConfigProperty(
+      UserSessionLimitsAuthenticatorFactory.USER_REALM_LIMIT, config);
+    int userClientLimit = getIntConfigProperty(
+      UserSessionLimitsAuthenticatorFactory.USER_CLIENT_LIMIT, config);
+
+    if (context.getRealm() != null &amp;&amp; context.getUser() != null) {
+
+      // Get the session count in this realm for this specific user
+      List&lt;UserSessionModel&gt; userSessionsForRealm = session.sessions()
+        .getUserSessions(context.getRealm(), context.getUser());
+      int userSessionCountForRealm = userSessionsForRealm.size();
+
+      // Get the session count related to the current client for this user
+      ClientModel currentClient = context.getAuthenticationSession().getClient();
+      log.infof(&quot;session-limiter&#39;s current keycloak clientId: %s&quot;, currentClient.getClientId());
+
+      List&lt;UserSessionModel&gt; userSessionsForClient = userSessionsForRealm.stream().filter(
+        session -&gt; session.getAuthenticatedClientSessionByClient(currentClient.getId()) != null)
+        .collect(Collectors.toList());
+      int userSessionCountForClient = userSessionsForClient.size();
+      log.infof(&quot;session-limiter&#39;s configured realm session limit: %s&quot;, userRealmLimit);
+      log.infof(&quot;session-limiter&#39;s configured client session limit: %s&quot;, userClientLimit);
+      log.infof(
+        &quot;session-limiter&#39;s count of total user sessions for the entire realm (could be apps other than web apps): %s&quot;,
+        userSessionCountForRealm);
+      log.infof(&quot;session-limiter&#39;s count of total user sessions for this keycloak client: %s&quot;,
+        userSessionCountForClient);
+
+      // First check if the user has too many sessions in this realm
+      if (exceedsLimit(userSessionCountForRealm, userRealmLimit)) {
+        log.info(&quot;Too many session in this realm for the current user.&quot;);
+        handleLimitExceeded(context, userSessionsForRealm);
+      } // otherwise if the user is still allowed to create a new session in the realm, check if this applies for this specific client as well.
+      else if (exceedsLimit(userSessionCountForClient, userClientLimit)) {
+        log.info(&quot;Too many sessions related to the current client for this user.&quot;);
+        handleLimitExceeded(context, userSessionsForClient);
+      } else {
+        context.success();
+      }
+    } else {
+      context.success();
+    }
+  }
+
+  private void handleLimitExceeded(AuthenticationFlowContext context,
+    List&lt;UserSessionModel&gt; userSessions) {
+    switch (behavior) {
+      case UserSessionLimitsAuthenticatorFactory.DENY_NEW_SESSION:
+        log.info(&quot;Denying new session&quot;);
+        context.failure(AuthenticationFlowError.INVALID_CLIENT_SESSION);
+        break;
+      case UserSessionLimitsAuthenticatorFactory.TERMINATE_OLDEST_SESSION:
+        log.info(&quot;Terminating oldest session&quot;);
+        logoutOldestSession(userSessions);
+        context.success();
+        break;
+      default:
+        break;
+    }
+  }
+
+  private void logoutOldestSession(List&lt;UserSessionModel&gt; userSessions) {
+    log.info(&quot;Logging out oldest session&quot;);
+    Optional&lt;UserSessionModel&gt; oldest = userSessions.stream()
+      .sorted(Comparator.comparingInt(UserSessionModel::getStarted)).findFirst();
+    oldest.ifPresent(
+      userSession -&gt; AuthenticationManager.backchannelLogout(session, userSession, true));
+  }
+}
+
+</code></pre>
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p>authentication flow<br><img src="20200608132937418_908857975.png" alt><br>点<code>config</code> 进行配置。<br><img src="20200608133708658_234115439.png" alt><br>可设置 每个用户可以最多有几个session。对每个client最多可以有几个session。 如果session数量超过限制如何处理：有两种选择，一、 拒绝创建新session。二、结束老session。</p>
+<p>已测可用。 有问题请留言。</p>
 
       
        <hr><span style="font-style: italic;color: gray;"> 转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。可以在下面评论区评论，也可以邮件至 wzslw@163.com </span>
@@ -436,12 +621,12 @@
 
 
 <div class="article_copyright">
-    <p><span>文章标题:</span>keycloak-调整日志打印级别</p>
-    <p><span>文章字数:</span><span class="post-count">390</span></p>
+    <p><span>文章标题:</span>keycloak-用户session数量限制</p>
+    <p><span>文章字数:</span><span class="post-count">891</span></p>
     <p><span>本文作者:</span><a href="javascript:void(0)" title="武继明">武继明</a></p>
-    <p><span>发布时间:</span>2020-05-09, 18:33:37</p>
-    <p><span>最后更新:</span>2020-05-09, 18:37:41</p>
-    <span>原始链接:</span><a class="post-url" href="/2020/05/09/keycloak-调整日志打印级别/" title="keycloak-调整日志打印级别">https://www.omingo.com/2020/05/09/keycloak-调整日志打印级别/</a>
+    <p><span>发布时间:</span>2020-06-08, 13:40:52</p>
+    <p><span>最后更新:</span>2020-06-08, 13:46:24</p>
+    <span>原始链接:</span><a class="post-url" href="/2020/06/08/keycloak-用户session数量限制/" title="keycloak-用户session数量限制">https://www.omingo.com/2020/06/08/keycloak-用户session数量限制/</a>
     <p>
         <span>版权声明:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target="_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
     </p>
@@ -459,7 +644,7 @@
             repo: 'omingo-cn',
             owner: 'omingo-cn',
             admin: ['wzslw'],
-            id: 'Sat May 09 2020 18:33:37 GMT+0800',
+            id: 'Mon Jun 08 2020 13:40:52 GMT+0800',
             distractionFreeMode: 'true',
             language: 'zh-CN',
             perPage: parseInt('10',10)
