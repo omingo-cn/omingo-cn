@@ -228,14 +228,14 @@
             <span class="post-date" title="2019-05-07 14:07:43">2019/05/07</span>
         </a>
         
-        <a class href="/2019/06/24/k8s安装指南/" data-tag="k8s" data-author>
-            <span class="post-title" title="k8s安装指南">k8s安装指南</span>
-            <span class="post-date" title="2019-06-24 15:33:49">2019/06/24</span>
-        </a>
-        
         <a class href="/2019/07/12/k8s上运行mysql/" data-tag="k8s" data-author>
             <span class="post-title" title="k8s上运行mysql">k8s上运行mysql</span>
             <span class="post-date" title="2019-07-12 17:19:17">2019/07/12</span>
+        </a>
+        
+        <a class href="/2019/06/24/k8s安装指南/" data-tag="k8s" data-author>
+            <span class="post-title" title="k8s安装指南">k8s安装指南</span>
+            <span class="post-date" title="2019-06-24 15:33:49">2019/06/24</span>
         </a>
         
         <a class="Keycloak " href="/2020/06/08/keycloak-mybatis整合/" data-tag="keycloak" data-author>
@@ -339,7 +339,7 @@
     </div>
     <div class="article-meta">
         
-        创建时间:<time class="date" title="更新时间: 2020-06-08 14:40:12">2020-06-08 14:39</time>
+        创建时间:<time class="date" title="更新时间: 2020-06-08 14:44:12">2020-06-08 14:39</time>
         
     </div>
     <div class="article-meta">
@@ -470,7 +470,7 @@ public class MybatisStorageProviderFactory implements UserStorageProviderFactory
 <h2 id="MybatisUserStorageProvider"><a href="#MybatisUserStorageProvider" class="headerlink" title="MybatisUserStorageProvider"></a>MybatisUserStorageProvider</h2><pre><code class="java">@JBossLog
 @Data
 @AllArgsConstructor
-public class DapengUserStorageProvider implements UserStorageProvider, UserLookupProvider,
+public class MybatisUserStorageProvider implements UserStorageProvider, UserLookupProvider,
   CredentialInputValidator {
   private  KeycloakSession session;
   private  ComponentModel componentModel;
@@ -543,7 +543,7 @@ public class DapengUserStorageProvider implements UserStorageProvider, UserLooku
     <p><span>文章字数:</span><span class="post-count">675</span></p>
     <p><span>本文作者:</span><a href="javascript:void(0)" title="武继明">武继明</a></p>
     <p><span>发布时间:</span>2020-06-08, 14:39:23</p>
-    <p><span>最后更新:</span>2020-06-08, 14:40:12</p>
+    <p><span>最后更新:</span>2020-06-08, 14:44:12</p>
     <span>原始链接:</span><a class="post-url" href="/2020/06/08/keycloak-mybatis整合/" title="keycloak-mybatis整合">https://www.omingo.com/2020/06/08/keycloak-mybatis整合/</a>
     <p>
         <span>版权声明:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target="_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
