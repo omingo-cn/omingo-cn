@@ -89,10 +89,10 @@ tags:
   </persistence-unit>
 
 </persistence>
+```
 
 >  hibernate.connection.provider_disables_autocommit 不配置为true的话，在进行更新操作的时候会报：`you cannot set autocommit during a managed transaction` 异常。
 
-```
 参考资料: [暴露emf全局jndi](https://docs.jboss.org/ejb3/app-server/reference/build/reference/en/html/entityconfig.html#referencing)
 
 编写一个工具类用来获取`EntityManagerFactory`:
