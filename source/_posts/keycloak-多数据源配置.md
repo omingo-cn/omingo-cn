@@ -81,7 +81,7 @@ tags:
 
     <properties>
       <property name="jboss.entity.manager.factory.jndi.name" value="java:jboss/emf/Dapeng"/><!--暴露为wildfly全局jndi-->
-
+      <property name="hibernate.connection.provider_disables_autocommit" value="true"/><!--注意这里设置,否则出现无法更新数据库错误-->
       <property name="hibernate.hbm2ddl.auto" value="none"/><!--注意这里设置,否则容易删库!!!-->
       <property name="hibernate.show_sql" value="true" />
     </properties>
@@ -89,6 +89,8 @@ tags:
   </persistence-unit>
 
 </persistence>
+
+>  hibernate.connection.provider_disables_autocommit 不配置为true的话，在进行更新操作的时候会报：`you cannot set autocommit during a managed transaction` 异常。
 
 ```
 参考资料: [暴露emf全局jndi](https://docs.jboss.org/ejb3/app-server/reference/build/reference/en/html/entityconfig.html#referencing)
