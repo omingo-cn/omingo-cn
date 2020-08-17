@@ -10,7 +10,7 @@ tags:
 服务注册和发现组件是微服务架构中很重要的一个组件，在生产环境中要避免产生单点故障。一定要跑多个互为备份的实例。本文讲述如何构建一个在k8s环境中可自由扩展实例的eureka镜像。
 
 ## 应用配置
-如何创建`spring-cloud`eureka项目就不多数了，我只列一下`application.yaml`中的关键配置。
+如何创建`spring-cloud`eureka项目就不多说了，我只列一下`application.yaml`中的关键配置。
 
 ```yaml
 server:
@@ -56,16 +56,17 @@ entrypoint.sh
 #!/usr/bin/env bash
 set -e
 
-MY_POD_NAME="mypodname"
-MY_IN_SERVICE_NAME="myinservicename"
-MY_POD_NAMESPACE="mypodnamespace"
+#MY_POD_NAME="mypodname"
+#MY_IN_SERVICE_NAME="myinservicename"
+#MY_POD_NAMESPACE="mypodnamespace"
+#EUREKA_REPLICAS=3
 
 EUREKA_HOST_NAME="$MY_POD_NAME.$MY_IN_SERVICE_NAME.$MY_POD_NAMESPACE"
 export EUREKA_HOST_NAME=$EUREKA_HOST_NAME
 
 BOOL_REGISTER="true"
 BOOL_FETCH="true"
-EUREKA_REPLICAS=3
+
 EUREKA_REPLICAS=${EUREKA_REPLICAS:-"1"} # 默认副本数为1
 
 if [ $EUREKA_REPLICAS = 1 ];then
