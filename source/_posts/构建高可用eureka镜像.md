@@ -103,7 +103,7 @@ exec "$@"
 apiVersion: v1
 kind: Service
 metadata:
-  name: eureka
+  name: eureka-server
   labels:
     app: eureka
 spec:
@@ -117,7 +117,7 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: eureka-server
+  name: eureka
 spec:
   podManagementPolicy: Parallel # 并行启动
   replicas: 2 # 副本数
