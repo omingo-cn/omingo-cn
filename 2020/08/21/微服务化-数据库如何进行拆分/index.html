@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  <title>微服务化-数据库如何进行拆分 | 猿明园</title>
+  <meta name="keywords" content=" 转载 , 数据库 ">
+  <meta name="description" content="微服务化-数据库如何进行拆分 | 猿明园">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="description" content="页面未找到！">
+<meta property="og:type" content="website">
+<meta property="og:title" content="404">
+<meta property="og:url" content="https://www.omingo.com/404.html">
+<meta property="og:site_name" content="猿明园">
+<meta property="og:description" content="页面未找到！">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-05-07T09:18:11.318Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="404">
+<meta name="twitter:description" content="页面未找到！">
+
+
+<link rel="icon" href="/img/avatar.png">
+
+<link rel="stylesheet" href="/css/style.css">
+
+<link rel="stylesheet" href="/css/hl_theme/sublime.css">
+
+<link href="//cdn.bootcss.com/animate.css/3.5.2/animate.min.css" rel="stylesheet">
+<link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="/js/jquery.autocomplete.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script>
+    hljs.initHighlightingOnLoad();
+</script>
+
+<script src="//cdn.bootcss.com/nprogress/0.2.0/nprogress.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+
+<script src="/js/iconfont.js"></script>
+</head>
+<div style="display: none">
+  <input class="theme_disqus_on" value="false">
+  <input class="theme_preload_comment" value="tfalserue">
+</div>
+<body>
+<aside class="nav">
+    <div class="nav-left">
+        <a href="/" class="avatar_target">
+    <img class="avatar" src="/img/avatar.png">
+</a>
+<div class="author">
+    <span>武继明</span>
+</div>
+
+<div class="icon">
+    
+        
+        <a title="rss" href="/atom.xml" target="_blank">
+            
+                <svg class="iconfont-svg" aria-hidden="true">
+                    <use xlink:href="#icon-rss"/>
+                </svg>
+            
+        </a>
+        
+    
+        
+        <a title="github" href="https://github.com/wzslw" target="_blank">
+            
+                <svg class="iconfont-svg" aria-hidden="true">
+                    <use xlink:href="#icon-github"/>
+                </svg>
+            
+        </a>
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+        <a title="csdn" href="https://blog.csdn.net/sylarlove" target="_blank">
+            
+                <svg class="iconfont-svg" aria-hidden="true">
+                    <use xlink:href="#icon-csdn"/>
+                </svg>
+            
+        </a>
+        
+    
+        
+    
+        
+    
+        
+        <a title="email" href="mailto:wzslw@163.com" target="_blank">
+            
+                <svg class="iconfont-svg" aria-hidden="true">
+                    <use xlink:href="#icon-email"/>
+                </svg>
+            
+        </a>
+        
+    
+</div>
+
+
+
+<ul>
+    <li class="all active">全部文章</li>
+    
+    <li data-rel="微服务"> 微服务 </li>
+    
+    <li data-rel="Keycloak"> Keycloak </li>
+    
+    <li data-rel="jpa"> jpa </li>
+    
+    <li data-rel="springMVC"> springMVC </li>
+    
+</ul>
+<div class="left-bottom">
+    <div class="menus">
+    
+    
+    </div>
+    <div><a class="about site_url" href="/about">关于</a></div>
+</div>
+<input type="hidden" id="yelog_site_posts_number" value="18">
+<input type="hidden" id="yelog_site_word_count" value="18.9k">
+<div style="display: none">
+    <span id="busuanzi_value_site_uv"></span>
+    <span id="busuanzi_value_site_pv"></span>
+</div>
+    </div>
+    <div class="nav-right">
+        <div class="friends-area">
+    <div class="friends-title">
+        友情链接
+        <i class="back-title-list"></i>
+    </div>
+    <div class="friends-content">
+        <ul>
+            
+        </ul>
+    </div>
+</div>
+        <div class="title-list">
+    <form onkeydown="if(event.keyCode==13){return false;}">
+        <input class="search" type="text" placeholder="以 in: 开头进行全文搜索" autocomplete="off" id="local-search-input">
+        <i class="cross"></i>
+        <span>
+            <label for="tagswitch">Tags:</label>
+            <input id="tagswitch" type="checkbox" style="display: none">
+            <i id="tagsWitchIcon"></i>
+        </span>
+    </form>
+    <div class="tags-list">
+    
+    <li class="article-tag-list-item">
+        <a href="javascript:" class="color2">oauth2</a>
+    </li>
+    
+    <li class="article-tag-list-item">
+        <a href="javascript:" class="color4">k8s</a>
+    </li>
+    
+    <li class="article-tag-list-item">
+        <a href="javascript:" class="color4">keycloak</a>
+    </li>
+    
+    <li class="article-tag-list-item">
+        <a href="javascript:" class="color3">日志</a>
+    </li>
+    
+    <li class="article-tag-list-item">
+        <a href="javascript:" class="color5">qdsl</a>
+    </li>
+    
+    <li class="article-tag-list-item">
+        <a href="javascript:" class="color4">jpa</a>
+    </li>
+    
+    <li class="article-tag-list-item">
+        <a href="javascript:" class="color3">升级</a>
+    </li>
+    
+    <li class="article-tag-list-item">
+        <a href="javascript:" class="color4">快捷键</a>
+    </li>
+    
+    <li class="article-tag-list-item">
+        <a href="javascript:" class="color5">服务发现</a>
+    </li>
+    
+    <li class="article-tag-list-item">
+        <a href="javascript:" class="color4">高可用</a>
+    </li>
+    
+    <li class="article-tag-list-item">
+        <a href="javascript:" class="color3">hystrix</a>
+    </li>
+    
+    <li class="article-tag-list-item">
+        <a href="javascript:" class="color3">转载</a>
+    </li>
+    
+    <li class="article-tag-list-item">
+        <a href="javascript:" class="color4">数据库</a>
+    </li>
+    
+    <div class="clearfix"></div>
+</div>
+
+    
+    <div id="local-search-result">
+
+    </div>
+    
+    <nav id="title-list-nav">
+        
+        <a class href="/2019/05/07/hello-world/" data-tag data-author>
+            <span class="post-title" title="Hello World">Hello World</span>
+            <span class="post-date" title="2019-05-07 14:07:43">2019/05/07</span>
+        </a>
+        
+        <a class href="/2019/07/12/k8s上运行mysql/" data-tag="k8s" data-author>
+            <span class="post-title" title="k8s上运行mysql">k8s上运行mysql</span>
+            <span class="post-date" title="2019-07-12 17:19:17">2019/07/12</span>
+        </a>
+        
+        <a class href="/2019/06/24/k8s安装指南/" data-tag="k8s" data-author>
+            <span class="post-title" title="k8s安装指南">k8s安装指南</span>
+            <span class="post-date" title="2019-06-24 15:33:49">2019/06/24</span>
+        </a>
+        
+        <a class="Keycloak " href="/2020/06/08/keycloak-mybatis整合/" data-tag="keycloak" data-author>
+            <span class="post-title" title="keycloak-mybatis整合">keycloak-mybatis整合</span>
+            <span class="post-date" title="2020-06-08 14:39:23">2020/06/08</span>
+        </a>
+        
+        <a class="Keycloak " href="/2020/05/11/keycloak-多数据源配置/" data-tag="keycloak" data-author>
+            <span class="post-title" title="keycloak-多数据源配置">keycloak-多数据源配置</span>
+            <span class="post-date" title="2020-05-11 17:08:40">2020/05/11</span>
+        </a>
+        
+        <a class="Keycloak " href="/2020/05/09/keycloak-调整日志打印级别/" data-tag="keycloak,日志" data-author>
+            <span class="post-title" title="keycloak-调整日志打印级别">keycloak-调整日志打印级别</span>
+            <span class="post-date" title="2020-05-09 18:33:37">2020/05/09</span>
+        </a>
+        
+        <a class="Keycloak " href="/2020/05/09/keycloak源码分析-启动/" data-tag="keycloak" data-author>
+            <span class="post-title" title="keycloak源码分析-启动">keycloak源码分析-启动</span>
+            <span class="post-date" title="2020-05-09 18:12:34">2020/05/09</span>
+        </a>
+        
+        <a class="jpa " href="/2019/05/07/spring-data-jpa进阶用法之QueryDSL/" data-tag="qdsl,jpa" data-author>
+            <span class="post-title" title="spring-data-jpa进阶用法之QueryDSL">spring-data-jpa进阶用法之QueryDSL</span>
+            <span class="post-date" title="2019-05-07 23:16:24">2019/05/07</span>
+        </a>
+        
+        <a class href="/2019/05/21/使用log-pilot收集docker容器日志/" data-tag="日志" data-author>
+            <span class="post-title" title="使用log-pilot收集docker容器日志">使用log-pilot收集docker容器日志</span>
+            <span class="post-date" title="2019-05-21 16:25:15">2019/05/21</span>
+        </a>
+        
+        <a class href="/2019/06/21/国内microk8s安装指南/" data-tag="k8s" data-author>
+            <span class="post-title" title="国内microk8s安装指南">国内microk8s安装指南</span>
+            <span class="post-date" title="2019-06-21 10:08:30">2019/06/21</span>
+        </a>
+        
+        <a class="微服务 " href="/2019/05/09/微服务不停服升级/" data-tag="升级" data-author>
+            <span class="post-title" title="微服务不停服升级">微服务不停服升级</span>
+            <span class="post-date" title="2019-05-09 14:41:32">2019/05/09</span>
+        </a>
+        
+        <a class="Keycloak " href="/2020/05/11/数据源配置/" data-tag="keycloak" data-author>
+            <span class="post-title" title="数据源配置">数据源配置</span>
+            <span class="post-date" title="2020-05-11 13:01:42">2020/05/11</span>
+        </a>
+        
+        <a class href="/2019/05/07/本博客快捷键说明/" data-tag="快捷键" data-author>
+            <span class="post-title" title="本博客快捷键说明">本博客快捷键说明</span>
+            <span class="post-date" title="2019-05-07 10:51:36">2019/05/07</span>
+        </a>
+        
+        <a class="微服务 " href="/2020/08/17/构建高可用eureka镜像/" data-tag="服务发现,高可用" data-author>
+            <span class="post-title" title="构建高可用eureka镜像">构建高可用eureka镜像</span>
+            <span class="post-date" title="2020-08-17 13:46:19">2020/08/17</span>
+        </a>
+        
+        <a class href="/2019/05/07/非spring-cloud项目增加hystrix监控/" data-tag="hystrix" data-author>
+            <span class="post-title" title="非spring-cloud项目增加hystrix监控">非spring-cloud项目增加hystrix监控</span>
+            <span class="post-date" title="2019-05-07 17:11:30">2019/05/07</span>
+        </a>
+        
+        <a class="Keycloak " href="/2020/06/08/keycloak-用户session数量限制/" data-tag="keycloak" data-author>
+            <span class="post-title" title="keycloak-用户session数量限制">keycloak-用户session数量限制</span>
+            <span class="post-date" title="2020-06-08 13:40:52">2020/06/08</span>
+        </a>
+        
+        <a class="springMVC " href="/2019/05/09/兄弟俩畅游Tomcat城市的SpringMVC科技园区/" data-tag="转载" data-author>
+            <span class="post-title" title="兄弟俩畅游Tomcat城市的SpringMVC科技园区">兄弟俩畅游Tomcat城市的SpringMVC科技园区</span>
+            <span class="post-date" title="2019-05-09 15:44:12">2019/05/09</span>
+        </a>
+        
+        <a class="微服务 " href="/2020/08/21/微服务化-数据库如何进行拆分/" data-tag="转载,数据库" data-author>
+            <span class="post-title" title="微服务化-数据库如何进行拆分">微服务化-数据库如何进行拆分</span>
+            <span class="post-date" title="2020-08-21 13:40:04">2020/08/21</span>
+        </a>
+        
+    </nav>
+</div>
+    </div>
+    <div class="hide-list">
+        <div class="semicircle">
+            <div class="brackets first"><</div>
+            <div class="brackets">&gt;</div>
+        </div>
+    </div>
+</aside>
+<div class="post">
+    <div class="pjax">
+        <article id="post-微服务化-数据库如何进行拆分" class="article article-type-post" itemscope itemprop="blogPost">
+    
+        <h1 class="article-title">微服务化-数据库如何进行拆分</h1>
+    
+    <div class="article-meta">
+        
+        
+        
+        <span class="book">
+            
+            <a href="javascript:" data-rel="微服务">微服务</a>
+            
+        </span>
+        
+        
+        <span class="tag">
+            
+            <a href="javascript:" class="color3">转载</a>
+            
+            <a href="javascript:" class="color4">数据库</a>
+            
+        </span>
+        
+    </div>
+    <div class="article-meta">
+        
+        创建时间:<time class="date" title="更新时间: 2020-08-21 13:50:38">2020-08-21 13:40</time>
+        
+    </div>
+    <div class="article-meta">
+        
+        <span>字数:6.4k</span>
+        
+        
+        <span id="busuanzi_container_page_pv">
+            阅读:<span id="busuanzi_value_page_pv">
+                <span class="count-comment">
+                    <span class="spinner">
+                      <div class="cube1"></div>
+                      <div class="cube2"></div>
+                    </span>
+                </span>
+            </span>
+        </span>
+        
+        
+    </div>
+    
+    <div class="article-meta">
+        <span class="origin">原文:
+            <a href="https://martinfowler.com/articles/extract-data-rich-service.html" target="_blank">
+                
+                https://martinfowler.com/articles/extract-data-rich-service.html
+                
+            </a>
+        </span>
+    </div>
+    
+    <div class="toc-ref">
+    
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#微服务化-如何拆分数据库"><span class="toc-text">微服务化-如何拆分数据库</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#服务拆分过程的指导原则"><span class="toc-text">服务拆分过程的指导原则</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#整个迁移过程中，数据保持有单一的写拷贝"><span class="toc-text">整个迁移过程中，数据保持有单一的写拷贝</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#遵循“架构演进原子化”的原则"><span class="toc-text">遵循“架构演进原子化”的原则</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#服务拆分的步骤"><span class="toc-text">服务拆分的步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#代码的初始状态"><span class="toc-text">代码的初始状态</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#步骤-1：识别新服务涉及到的逻辑和数据"><span class="toc-text">步骤 1：识别新服务涉及到的逻辑和数据</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#步骤-2：在单体应用中对新服务进行逻辑上的拆分"><span class="toc-text">步骤 2：在单体应用中对新服务进行逻辑上的拆分</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#步骤-3：为身处单体服务当中的新服务创建数据表"><span class="toc-text">步骤 3：为身处单体服务当中的新服务创建数据表</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#步骤-4：创建新的服务，并且访问单体应用的原有数据库"><span class="toc-text">步骤 4：创建新的服务，并且访问单体应用的原有数据库</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#步骤-5：让客户端使用新的服务"><span class="toc-text">步骤 5：让客户端使用新的服务</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#步骤-6：为新服务创建数据库"><span class="toc-text">步骤 6：为新服务创建数据库</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#步骤-7：同步数据到新数据库"><span class="toc-text">步骤 7：同步数据到新数据库</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#步骤-8：让新服务使用新数据库"><span class="toc-text">步骤 8：让新服务使用新数据库</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#步骤-9：从单体应用中删除新服务相关的逻辑和数据"><span class="toc-text">步骤 9：从单体应用中删除新服务相关的逻辑和数据</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-text">总结</span></a></li></ol></li></ol>
+    
+<style>
+    .left-col .switch-btn,
+    .left-col .switch-area {
+        display: none;
+    }
+    .toc-level-3 i,
+    .toc-level-3 ol {
+        display: none !important;
+    }
+</style>
+</div>
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="微服务化-如何拆分数据库"><a href="#微服务化-如何拆分数据库" class="headerlink" title="微服务化-如何拆分数据库"></a>微服务化-如何拆分数据库</h1><p>在将单体应用拆分为较小服务的过程中，最难的部分就是单体服务数据库中的数据拆分。要进行这样的拆分，保证数据有一个全程唯一的写拷贝，并且遵循一系列步骤是很有帮助的。拆分步骤从对现有单体应用的逻辑分割开始：将服务行为拆分为一个单独的模块，然后把数据拆分到单独的数据表中。一系列动作之后，这些元素最终成为一个自治的新服务。</p>
+<p>从单体应用向较小服务的迁移是目前的主流趋势。投资进行这样的迁移，其动力在于，围绕业务能力构建较小服务，能够提高开发者的生产力。团队一旦成为服务的主人，同时也就成为自身命运的主人，这就意味着可以不受系统中其他服务的限制，自由的对自有服务进行改善和升级。</p>
+<p>这个转换过程之中最难的部分，就是从单体应用所持有的数据库中把新服务所属的数据拆分出来。如果从单体应用中拆分出来的逻辑部分仍然连接到同一个数据库，这种拆分无疑是比较简单的。但是这样一来，数据库就成为跨应用共享数据库，整个系统所呈现出的各自独立的分布式形态仅是徒有其表，在数据库层面，这依旧是一个紧耦合系统。真正独立的服务需要有独立的数据库——格式和数据都专属于服务。</p>
+<p>本文中要讲述一系列步骤组成的一个解构模式，用来在最小化业务中断的前提下，从单体应用中拆出富数据服务。</p>
+<h2 id="服务拆分过程的指导原则"><a href="#服务拆分过程的指导原则" class="headerlink" title="服务拆分过程的指导原则"></a>服务拆分过程的指导原则</h2><p>深入探讨之前，我想首先介绍两个对于服务拆分具有重要指导意义的基本原则。这两条原则能把从单体应用到多服务的拆分过程变得更加平滑，也更加安全。</p>
+<h3 id="整个迁移过程中，数据保持有单一的写拷贝"><a href="#整个迁移过程中，数据保持有单一的写拷贝" class="headerlink" title="整个迁移过程中，数据保持有单一的写拷贝"></a>整个迁移过程中，数据保持有单一的写拷贝</h3><p>在转移过程中，我们应该保证待迁出服务的数据始终有一个单独的写拷贝。如果出现了多个可写拷贝，就会出现写冲突的风险。当多个客户端同时写入同一块数据的时候，写冲突就会出现。写冲突的应对是比较复杂的——需要选择一个处理模式，并进行相应的处理。例如以最后写入为准的话，会给部分客户端带来意料之外的后果，同时还要通知写入失败的客户端进行相应的纠错处理。这样的逻辑无疑是比较复杂的，应该尽量避免。</p>
+<p>这里的服务拆分模式会保证在服务拆分过程中的任意时间点上，都保持唯一的可写副本，从而避免写冲突造成的复杂性。</p>
+<h3 id="遵循“架构演进原子化”的原则"><a href="#遵循“架构演进原子化”的原则" class="headerlink" title="遵循“架构演进原子化”的原则"></a>遵循“架构演进原子化”的原则</h3><p>代表在架构迁移过程中使用一系列原子化步骤。这些步骤完成以后，架构就完成了承诺的升级。如果这些步骤没有完全执行，那么这一架构的状态会比初始状态更加糟糕。例如决定分拆一个服务，结果最后只拆分了逻辑，没能拆分数据，这样收获的是一个数据库层耦合的状态，这一状态依然会导致开发和运行时的紧密耦合。实际上对比开始分拆之前，系统变得更加复杂，开发和除错的难度也随之增加了。</p>
+<p>下面讲到的模式中，我们建议完成其中的所有步骤来完成拆分工作。服务分拆过程之中的最大障碍并非来自技术，而是如何让既有的单体应用客户迁移到新的服务之中去。我们将在第五步讨论这一话题。</p>
+<h2 id="服务拆分的步骤"><a href="#服务拆分的步骤" class="headerlink" title="服务拆分的步骤"></a>服务拆分的步骤</h2><p>现在让我们进入实际的服务拆分模式之中。为了方便讲述和操作，我们会做一个例子，来解释服务拆分的具体过程。</p>
+<p>假设有个单体形态的商品信息系统，用来给我们的电商平台提供商品信息。经过一段时间的发展和演进，这一系统的服务范围不仅包含了商品名称、类目名称等核心信息和相关逻辑，同时还包含了商品定价方面的逻辑和数据。商品核心信息和价格信息之间并没有清晰的边界。</p>
+<p>另外系统的变动频率来看，价格方面的系统变更频率要远高于核心信息部分。数据访问的模式也是各有千秋。商品的价格信息变动比核心商品属性同样要快得多。这样一来，把价格部分分拆到单体应用之外，形成一个单独的服务就是个非常有吸引力的想法了。</p>
+<p>同商品核心信息相比，价格信息更加适合分拆，这是因为在原有应用的依赖体系中，定价功能是一个叶子节点。核心商品信息被很多其他功能所依赖，例如商品库存、市场等很多功能。如果将核心信息功能分拆出来，就意味着同时要触动很多相关系统，这会产生很大的风险。因此应该在功能依赖图中选择一个有业务价值的叶子节点作为开始。</p>
+<img src="/2020/08/21/微服务化-数据库如何进行拆分/20200821120535723_752202678.png">
+<blockquote>
+<p>图 1：类目系统中包含了核心信息和价格信息两部分的逻辑和数据。有两个客户端——Web 应用和 iOS app。</p>
+</blockquote>
+<h3 id="代码的初始状态"><a href="#代码的初始状态" class="headerlink" title="代码的初始状态"></a>代码的初始状态</h3><p>下面是商品系统的现有代码。很明显的，这些代码不具备真实的复杂度。然而用来演示拆分富数据服务的重构过程，其复杂度还是足够的。下面的内容中会看到每个步骤中代码的变化过程。</p>
+<p>这段代码中包含了一个 <code>CatalogService</code> 接口，用于给客户端提供服务。它使用一个 <code>productRepository</code> 类和数据库进行交互，用于数据的获取和存储。<code>Product</code> 是一个（Dumb data class）哑类，包含了商品信息。哑类设计是一种反模式设计，不过这不是本文的重点。<code>Sku</code>、<code>Price</code> 以及 <code>CategoryPriceRange</code> 几个类都是比较边缘的小类。</p>
+<pre><code class="java">class CatalogService…
+
+  public Sku searchProduct(String searchString) {
+      return productRepository.searchProduct(searchString);
+  }
+
+  public Price getPriceFor(Sku sku) {
+      Product product = productRepository.queryProduct(sku);
+      return calculatePriceFor(product);
+  }
+
+  private Price calculatePriceFor(Product product) {
+      if(product.isOnSale()) return product.getSalePrice();
+      return product.getOriginalPrice();
+  }
+
+  public CategoryPriceRange getPriceRangeFor(Category category) {
+      List&lt;Product&gt; products = productRepository.findProductsFor(category);
+      Price maxPrice = null;
+      Price minPrice = null;
+      for (Product product : products) {
+          if (product.isActive()) {
+              Price productPrice = calculatePriceFor(product);
+              if (maxPrice == null || productPrice.isGreaterThan(maxPrice)) {
+                  maxPrice = productPrice;
+              }
+              if (minPrice == null || productPrice.isLesserThan(minPrice)) {
+                  minPrice = productPrice;
+              }
+          }
+      }
+      return new CategoryPriceRange(category, minPrice, maxPrice);
+  }
+
+  public void updateIsOnSaleFor(Sku sku) {
+      final Product product = productRepository.queryProduct(sku);
+      product.setOnSale(true);
+      productRepository.save(product);
+  }
+</code></pre>
+<p>下面就开始从商品单体应用中抽取 “Product pricing” 服务的第一步。</p>
+<h4 id="步骤-1：识别新服务涉及到的逻辑和数据"><a href="#步骤-1：识别新服务涉及到的逻辑和数据" class="headerlink" title="步骤 1：识别新服务涉及到的逻辑和数据"></a>步骤 1：识别新服务涉及到的逻辑和数据</h4><p>第一个步骤中，需要对商品应用中的商品定价服务所包含的逻辑和数据进行识别。我们的商品应用中包含了一个 <code>Products</code> 数据表，其中包含了<code>name</code>、<code>SKU</code>、<code>category_name</code> 以及<code>is_active</code> 标志（用于表示该商品是否有效或者已经弃用）等核心数据。每个商品都属于一个商品类目，类目就是一组商品。例如“男式衬衫”类目包含了花衬衫和晚礼服衬衫等商品。同时这个应用中还有一些核心的商品逻辑，例如根据名称进行商品搜索等。</p>
+<p><code>Products</code> 数据表还有一些定价相关的字段，例如 <code>original_price</code>、<code>sale_price</code> 以及<code>is_on_sale</code> 标志（用于标识该商品是否在售）。商品应用中包含了一些定价方面的功能，比如计算商品价格、更新 <code>is_on_sale</code> 标志。另外还有一个纠结的功能，就是获取一个类目的价格区间，它主要属于定价范畴，但是也要涉及一些商品的核心功能。<br><img src="/2020/08/21/微服务化-数据库如何进行拆分/20200821120929358_1234573143.png"></p>
+<blockquote>
+<p>图 2：绿色部分是商品的核心逻辑和数据，蓝色部分是定价方面的逻辑和数据。 </p>
+</blockquote>
+<p>接下来重新贴一下上面的代码，代码没有发生变化，核心部分加入了注释（原文用蓝绿标识，MD 格式限制，只能用注释代替）。</p>
+<pre><code class="java">  // 搜索商品
+  public Sku searchProduct(String searchString) {
+      return productRepository.searchProduct(searchString);
+  }
+
+  public Price getPriceFor(Sku sku) {
+      Product product = productRepository.queryProduct(sku);
+      return calculatePriceFor(product);
+  }
+
+  private Price calculatePriceFor(Product product) {
+      if(product.isOnSale()) return product.getSalePrice();
+      return product.getOriginalPrice();
+  }
+
+  public CategoryPriceRange getPriceRangeFor(Category category) {
+      // 搜索指定类目中的商品
+      List&lt;Product&gt; products = productRepository.findProductsFor(category);
+      Price maxPrice = null;
+      Price minPrice = null;
+      for (Product product : products) {
+          // 商品是否可用
+          if (product.isActive()) {
+              Price productPrice = calculatePriceFor(product);
+              if (maxPrice == null || productPrice.isGreaterThan(maxPrice)) {
+                  maxPrice = productPrice;
+              }
+              if (minPrice == null || productPrice.isLesserThan(minPrice)) {
+                  minPrice = productPrice;
+              }
+          }
+      }
+      return new CategoryPriceRange(category, minPrice, maxPrice);
+  }
+
+  public void updateIsOnSaleFor(Sku sku) {
+      final Product product = productRepository.queryProduct(sku);
+      product.setOnSale(true);
+      productRepository.save(product);
+  }
+</code></pre>
+<h4 id="步骤-2：在单体应用中对新服务进行逻辑上的拆分"><a href="#步骤-2：在单体应用中对新服务进行逻辑上的拆分" class="headerlink" title="步骤 2：在单体应用中对新服务进行逻辑上的拆分"></a>步骤 2：在单体应用中对新服务进行逻辑上的拆分</h4><p>第二三步是关于逻辑拆分的，要在商品应用持续运作的情况下，对商品定价服务的逻辑和数据进行逻辑上的分割。简而言之就是在创建新服务之前，首先在单体应用中，对产品的定价数据和逻辑进行隔离。这样做的好处在于，由于还在同一个代码库中，如果定错了产品定价服务所包含的逻辑或者数据边界，纠正这一错误所需的重构工作，相对于拆分为新服务之后，会比较简单一些。<br>第二步的一部分，我们要创建两个服务类，用来封装不同对象的逻辑：</p>
+<ul>
+<li>商品核心类：<code>CoreProductService</code></li>
+<li>商品定价类：<code>ProductPricingService</code></li>
+</ul>
+<p>这些服务类会和我们的“物理”类一一对应，也就是后面看到的商品定价和商品核心。我们还会创建独立的存储类—— <code>ProductPriceRepository</code> 用来访问产品定价数据，以及 <code>CoreProductRepository</code> 用来访问核心商品数据，这两种数据目前都存储在 <code>Products</code> 数据表中。</p>
+<p>这部分工作中，需要时刻注意的关键一点是 <code>ProductPricingService</code> 或者 <code>ProductPriceRepository</code> 不应该访问 <code>Products</code> 表中的商品核心信息，而应该通过 <code>CoreProductService</code> 类来进行所有商品核心信息相关的访问。下文中会看到对 <code>getPriceRangeFor</code> 方法进行重构的例子。</p>
+<p>不允许存在商品核心信息和商品定价信息之间的表关联。类似的，数据库中也不该有核心商品信息和商品定价信息之间的硬约束。所有的 <strong>JOIN</strong> 和 约束都应该从数据库层转移到逻辑层。不过知易行难是个普遍规律，数据库的拆分过程中，这一点是个难度和必要性都很高的任务。</p>
+<p>不难看出，商品核心和商品定价之间是有一个共享的标识符的——两个系统中，<code>SKU</code> 都能能够作为商品的唯一标识。这种跨系统标识符会用在跨系统的通信过程之中，它的重要性显而易见，因此必须慎重选择。只能够有一个系统独立掌握这一数据。所有其它服务都只能对其进行只读的引用——在这些服务的视角中，标识符是固定不变的。标识符所属的实体，其生命周期的管理者，是最适合作为该标识符的属主的。例如我们的案例中，商品核心信息服务掌控着商品的生命周期，因此 <code>SKU</code> 标识符也应该由这一部分进行管理。<br><img src="/2020/08/21/微服务化-数据库如何进行拆分/20200821121503545_1463964774.png"></p>
+<blockquote>
+<p>图 3：商品核心信息逻辑和商品定价逻辑的拆分，此时商品定价逻辑仍然连接在同一个商品数据表上。</p>
+</blockquote>
+<p>下面是重构的代码。你会看到新建了 <code>ProductPricingService</code> 用来负责定价相关的逻辑。另外还定义了 <code>productPriceRepository</code> 用来访问 <code>Products</code> 表中的定价相关数据。现在的 <code>Product</code> 数据类被分为了 <code>CoreProduct</code> 和 <code>ProductPrice</code> 两个类，分别用户处理商品核心信息和商品定价信息。</p>
+<pre><code class="java">class ProductPricingService…
+
+  public Price getPriceFor(Sku sku) {
+      ProductPrice productPrice = productPriceRepository.getPriceFor(sku);
+      return calculatePriceFor(productPrice);
+  }
+
+  private Price calculatePriceFor(ProductPrice productPrice) {
+      if(productPrice.isOnSale()) return productPrice.getSalePrice();
+      return productPrice.getOriginalPrice();
+  }
+</code></pre>
+<p>获取指定类目的价格范围，这一功能相对复杂。这是因为它需要获取类目中的商品列表，而这一操作是属于商品核心部分的。<code>getPriceRangeFor</code> 方法首先要调用 <code>coreProductService</code> 的 <code>getActiveProductsFor</code> 方法来获取类目中的有效商品列表。前面提到过 <code>is_active</code> 是商品核心的属性，因此将 <code>isActive</code> 检查也放到 coreProductService 之中。</p>
+<pre><code class="java">class ProductPricingService…
+
+  public CategoryPriceRange getPriceRangeFor(Category category) {
+      // 获取商品列表
+      List&lt;CoreProduct&gt; products = coreProductService.getActiveProductsFor(category);
+
+      // 根据商品列表获取价格
+      List&lt;ProductPrice&gt; productPrices = productPriceRepository.getProductPricesFor(mapCoreProductToSku(products));
+
+      Price maxPrice = null;
+      Price minPrice = null;
+      for (ProductPrice productPrice : productPrices) {
+              Price currentProductPrice = calculatePriceFor(productPrice);
+              if (maxPrice == null || currentProductPrice.isGreaterThan(maxPrice)) {
+                  maxPrice = currentProductPrice;
+              }
+              if (minPrice == null || currentProductPrice.isLesserThan(minPrice)) {
+                  minPrice = currentProductPrice;
+              }
+      }
+      return new CategoryPriceRange(category, minPrice, maxPrice);
+  }
+
+  private List&lt;Sku&gt; mapCoreProductToSku(List&lt;CoreProduct&gt; coreProducts) {
+      return coreProducts.stream().map(p -&gt; p.getSku()).collect(Collectors.toList());
+  }
+</code></pre>
+<p><code>getActiveProductsFor</code> 方法获取指定类目商品列表的代码大致如下 :</p>
+<pre><code class="java">class CoreProductService…
+
+  public List&lt;CoreProduct&gt; getActiveProductsFor(Category category) {
+      // 获取类目下的商品列表
+      List&lt;CoreProduct&gt; productsForCategory = coreProductRepository.getProductsFor(category);
+      // 只返回 is_active 的商品列表
+      return filterActiveProducts(productsForCategory);
+  }
+
+  // 根据 is_active 进行过滤
+  private List&lt;CoreProduct&gt; filterActiveProducts(List&lt;CoreProduct&gt; products) {
+      return products.stream().filter(p -&gt; p.isActive()).collect(Collectors.toList());
+  }
+</code></pre>
+<p>在本例中，我们把 <code>isActive</code> 的检查保留在了服务中，但是把它转移到数据库查询之中也是很容易的。实际上将功能拆分为多个服务之后，很容易发现这些将逻辑下放到查询层从而提高运行效率的机会。</p>
+<p><code>updateIsOnSale</code> 功能非常直接，可以进行如下重构：</p>
+<pre><code class="java">class ProductPricingService…
+
+  public void updateIsOnSaleFor(Sku sku) {
+      final ProductPrice productPrice = productPriceRepository.getPriceFor(sku);
+      productPrice.setOnSale(true);
+      productPriceRepository.save(productPrice);
+</code></pre>
+<p><code>searchProduct</code> 方法指向新建的 <code>coreProductRepository</code>，用于商品搜索。</p>
+<pre><code class="java">class CoreProductService…
+
+  public Sku searchProduct(String searchString) {
+      return coreProductRepository.searchProduct(searchString);
+  }
+</code></pre>
+<p>原单体应用的顶层接口是 <code>CatalogService</code>，这里也需要进行重构，对不同的功能调用，要委托给不同的服务——<code>CoreProductService</code> 和 <code>ProductPricingService</code>。这个过程很重要，它保障了现有的客户端和服务端之间的契约。</p>
+<p><code>searchProduct</code> 方法委托给了 <code>CoreProductService</code>：</p>
+<pre><code class="java">class CatalogService…
+
+  public Sku searchProduct(String searchString) {
+      return coreProductService.searchProduct(searchString);
+  }
+</code></pre>
+<p>定价相关的方法则委托给了 <code>productPricingService</code>：</p>
+<pre><code class="java">class CatalogService…
+
+  public Price getPriceFor(Sku sku) {
+      return productPricingService.getPriceFor(sku);
+  }
+
+  public CategoryPriceRange getPriceRangeFor(Category category) {
+      return productPricingService.getPriceRangeFor(category);
+  }
+
+  public void updateIsOnSaleFor(Sku sku) {
+      productPricingService.updateIsOnSaleFor(sku);
+  }
+</code></pre>
+<h4 id="步骤-3：为身处单体服务当中的新服务创建数据表"><a href="#步骤-3：为身处单体服务当中的新服务创建数据表" class="headerlink" title="步骤 3：为身处单体服务当中的新服务创建数据表"></a>步骤 3：为身处单体服务当中的新服务创建数据表</h4><p>这个步骤中，我们要把定价相关的数据拆分到一个新的数据表中——<code>Productprices</code>。这一步骤的最后，商品定价逻辑应该访问 <code>ProductPrices</code> 数据表，而不再是 <code>Products</code> 表。对任何 <code>Products</code> 数据表中关于商品核心信息的请求，都应该从商品核心逻辑层中获取。这个步骤中，除了 <code>productPricingRepository</code> 类之外，所有其他类，尤其是服务类的代码都不应被触及。</p>
+<p>这个步骤中要把一个数据表一分为二，因此很重要的一项工作就是 <code>Products</code> 表到 <code>ProductPrices</code> 表的数据迁移。</p>
+<p>在本步骤最后，可能会觉察到新服务可能会对整体系统造成一些影响，尤其是性能方面。逻辑层中的内存内数据 <strong>Join</strong> 的性能影响是显而易见的。在我们的例子中，<code>getPriceRangeFor</code> 方法就在商品核心信息和商品定价信息之间进行了一次连接。在业务代码中完成数据连接相对于数据库来说，始终是一种更大开销的操作，这也是数据解耦的代价之一。如果在这一阶段中的性能损失非常严重，那么把数据迁回的话，情况会变得更糟糕，更不要提将服务进行物理拆分之后了。如果性能需求（以及可能存在的受这次重构影响的其他需求）无法满足，那么很可能需要重新思考一下服务边界的问题。至少在目前阶段里，Web 应用和 iOS 还都保持良好，这是因为我们没有修改任何和客户端发生交互的部分。这一步骤的另一个功能，就是进行了一次物美价廉的测试。<br><img src="/2020/08/21/微服务化-数据库如何进行拆分/20200821122725122_1150861971.png"></p>
+<blockquote>
+<p>图 4：拆分成两块：商品核心的数据和逻辑，商品定价的数据和逻辑。</p>
+</blockquote>
+<h4 id="步骤-4：创建新的服务，并且访问单体应用的原有数据库"><a href="#步骤-4：创建新的服务，并且访问单体应用的原有数据库" class="headerlink" title="步骤 4：创建新的服务，并且访问单体应用的原有数据库"></a>步骤 4：创建新的服务，并且访问单体应用的原有数据库</h4><p>这个步骤中就要开始给商品定价的逻辑建立新的“物理”服务了，新的服务以 <code>ProductPricingService</code> 为基础，但是数据库依旧沿用单体应用所持有的 <code>ProductPrice</code> 数据表。注意到了这一步，<code>ProductPricingService</code> 调用 <code>CoreProductService</code> 就会变为网络调用了，这种变化不仅会对性能造成影响，还需要增加对超时等网络调用特有问题的处理。</p>
+<p>这也是一个业务抽象验证的好机会，这里可以看到新的商品定价服务的建模到底针对的是技术方案还是业务需求。例如当业务用户在执行 <code>updateIsOnSale</code> 时，他的真正需要是在系统中给特定商品创建一个“促销”。下面的代码就是重构以后的 <code>updateIsOnSaleFor</code>。我们响应业务需求，对功能进行了改进，在参数中加入了促销价格，这在以前是没有的。这还是一个将从前流落到客户端的逻辑重新归纳到服务级别的好机会。在客户端的角度来看，这明显是一个有利的变更。</p>
+<pre><code class="java">class ProductPricingService…
+
+  public void createPromotion(Promotion promotion) {
+      final ProductPrice productPrice = productPriceRepository.getPriceFor(promotion.getSku());
+      productPrice.setOnSale(true);
+      productPrice.setSalePrice(promotion.getPrice());
+      productPriceRepository.save(productPrice);
+  }
+</code></pre>
+<p>当然这些重构并非天马行空任意施为的，其中一个重要限制就是不能修改表结构以及表数据的语义，否则可能会破坏掉单体应用中的已有功能。服务拆分大功告成之后（步骤 9），就可以对自己的数据库以及代码为所欲为了。</p>
+<p>你可能想要在进行客户端迁移之前进行这一变更，尤其是在大型组织机构中，要让大量不同的服务消费者在限定时间内进行迁移，这一过程需要消耗大量的时间和金钱。下一步中会详细讨论这一问题。新的定价服务可以安全的部署到生产环境中进行测试——反正没有客户端在使用这一服务。同样这里对客户端没有任何变更，例如本例中的 Web 应用和 iOS App 都没有受到任何影响。</p>
+<img src="/2020/08/21/微服务化-数据库如何进行拆分/20200821122927007_556836816.png">
+<blockquote>
+<p>图 5：商品定价服务分拆成了新的“物理”服务，新服务在数据方面要依赖单体应用中的 <code>ProductPrices</code> 表，而功能上则要依赖于单体应用中的核心产品功能。</p>
+</blockquote>
+<h4 id="步骤-5：让客户端使用新的服务"><a href="#步骤-5：让客户端使用新的服务" class="headerlink" title="步骤 5：让客户端使用新的服务"></a>步骤 5：让客户端使用新的服务</h4><p>这个步骤里，单体服务的客户端中涉及商品定价的部分就需要转移到新的服务上了。这一阶段的工作有两个依赖项：</p>
+<ul>
+<li>新旧结构中有多少接口发生了变更。</li>
+<li>在组织视角，有多少客户端团队需要及时进行迁移。</li>
+</ul>
+<p>这一步骤启动以后，整体架构可能会处于一个中间状态：新旧服务都有客户端在访问。这种状况实际上是比初始状态更加糟糕的。这就是前面讨论过的原子化的架构演进原则的必要性。在迁移开始之前，要获得组织的确认，所有新功能的相关客户端能够按时完成迁移。在架构处于半完成状态期间，是非常容易受到其他的所谓高优先级问题的干扰的。</p>
+<p>好消息是，并非所有客户端都需要同时进行迁移。然而在进行下一步之前，完成所有的客户端改造是必要的。可以设置一些服务级的监控机制来监视定价相关的方法，来识别没有完成相关变更的客户端。</p>
+<p>理论上可以在客户端完成改造之前开始一些下一步的工作，尤其是下一步中包含了创建定价数据库的操作，但是为了工作的简化，我还是建议尽量按照顺序完成步骤。</p>
+<img src="/2020/08/21/微服务化-数据库如何进行拆分/20200821133223153_1665566047.png">
+<blockquote>
+<p>图 6：要使用定价功能的客户端已经迁移到新的定价服务。</p>
+</blockquote>
+<h4 id="步骤-6：为新服务创建数据库"><a href="#步骤-6：为新服务创建数据库" class="headerlink" title="步骤 6：为新服务创建数据库"></a>步骤 6：为新服务创建数据库</h4><p>这一步相对简单，从单体应用的数据表中进行镜像，创建新的定价数据库。这一过程中有个很大的诱惑就是：既然代码已经进行了重构，干脆也对定价数据库进行一次重构吧。但是数据结构的变化会提高后面将要进行的数据迁移过程的难度。这还意味着新的新的定价服务同时要支持两套不同的结构。我还是建议让事情简单一点：首先分离定价服务（终结所有本文中提到的步骤），然后单独对定价服务进行重构。定价数据库的隔离一旦完成，对数据库的修改就很容易了，毕竟没有客户端会直接访问数据库。<br><img src="/2020/08/21/微服务化-数据库如何进行拆分/20200821133337609_532624610.png"></p>
+<blockquote>
+<p>图 7：独立的定价数据库已经建立。</p>
+</blockquote>
+<h4 id="步骤-7：同步数据到新数据库"><a href="#步骤-7：同步数据到新数据库" class="headerlink" title="步骤 7：同步数据到新数据库"></a>步骤 7：同步数据到新数据库</h4><p>这一步需要从单体应用的数据库中把定价表的数据同步给新的定价数据库。如果结构没有发生变化，那么这个同步过程是非常简单明了的。基本上相当于把定价数据库设置为原有数据库的只读副本过程（仅涉及到定价相关的数据表）。这样也能保障新的定价数据库的及时性。</p>
+<p>迁移完成后，就可以准备在下个步骤中，让独立的定价服务来访问新的定价数据库了。<br><img src="/2020/08/21/微服务化-数据库如何进行拆分/20200821133431892_1930230827.png"></p>
+<blockquote>
+<p>图 8：从旧数据库中同步定价数据表给新建的定价数据库。</p>
+</blockquote>
+<h4 id="步骤-8：让新服务使用新数据库"><a href="#步骤-8：让新服务使用新数据库" class="headerlink" title="步骤 8：让新服务使用新数据库"></a>步骤 8：让新服务使用新数据库</h4><p>开始之前，必须要保证所有使用定价功能的客户端迁移到新的服务上去。如果没有，就面临着写入冲突的风险，这也是前面强调“唯一写拷贝”原则的理由。所有客户端都迁移到新的服务端之后，就需要将定价服务指向新的数据库了。简单说来就是把数据库连接进行一次切换。</p>
+<p>这样做的一个好处就是在出现问题的时候，还有机会轻松的迁移回到原数据库。有一种常见问题就是，新数据库中缺乏一些新服务所必须的数据表或者字段。这是步骤一中的失误所产生的后果。有可能是缺少了一些必要的引用数据，比如货币代码。成功解决这些问题之后，就可以进入下一步了。</p>
+<img src="/2020/08/21/微服务化-数据库如何进行拆分/20200821133536686_1995925764.png">
+<blockquote>
+<p>图 9：指向定价数据库的定价服务。</p>
+</blockquote>
+<h4 id="步骤-9：从单体应用中删除新服务相关的逻辑和数据"><a href="#步骤-9：从单体应用中删除新服务相关的逻辑和数据" class="headerlink" title="步骤 9：从单体应用中删除新服务相关的逻辑和数据"></a>步骤 9：从单体应用中删除新服务相关的逻辑和数据</h4><p> 这里就要从原有应用中删除定价功能相关的逻辑和数据库了。很多团队会在数据库中留着旧数据，仅仅是因为担心“万一有用呢？”。进行一次全库备份可能有助于缓解这种恐惧。</p>
+<p>现在 <code>CatalogService</code> 的所有功能都委托给了对 <code>CoreProductService</code> 服务的调用，顺理成章地，我们就可以移除这一中间层，让客户直接调用 <code>CoreProductService</code> 服务了。</p>
+<img src="/2020/08/21/微服务化-数据库如何进行拆分/20200821133700116_1081728115.png">
+<blockquote>
+<p>图 10：商品核心只有商品核心的相关逻辑和数据；商品定价服务持有定价的逻辑和数据，二者仅在逻辑层面进行交互。</p>
+</blockquote>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>大功告成！我们成功的把数据的服务从单体应用中解放了出来。</p>
+<p>第一次进行这项工作时，会有很多痛苦，也会受到很多教训，这都会让你的下一次拆分更加顺利。初次拆分过程中，不管面对多大诱惑，都最好不要尝试合并这些步骤。一次只进行一步，让整个工作流程更少悬念，更多的安全感和可预测性。在成功掌握这一模式之后，就可以根据自身所学对这些步骤进行优化了。</p>
+<p>祝你好运！</p>
+
+      
+       <hr><span style="font-style: italic;color: gray;"> 转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。可以在下面评论区评论，也可以邮件至 wzslw@163.com </span>
+    </div>
+</article>
+
+
+<p>
+    <a href="javascript:void(0)" class="dashang" onclick="dashangToggle()">赏</a>
+</p>
+
+
+
+    <div id="comments"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+<script type="text/javascript">
+    $.getScript('https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', function () {
+        var gitalk = new Gitalk({
+            clientID: 'cefdfb8adbe2aa4f6659',
+            clientSecret: '1b70e598bd83fc87a81a9360226da0509c0d9e09',
+            repo: 'omingo-cn',
+            owner: 'omingo-cn',
+            admin: ['wzslw'],
+            id: 'Fri Aug 21 2020 13:40:04 GMT+0800',
+            distractionFreeMode: 'true',
+            language: 'zh-CN',
+            perPage: parseInt('10',10)
+        })
+        gitalk.render('comments')
+    })
+</script>
+
+
+
+    
+
+    </div>
+    <div class="copyright">
+        <p class="footer-entry">©2019-2025 wujiming</p>
+<!-- <p class="footer-entry">Built with <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/yelog/hexo-theme-3-hexo" target="_blank">3-hexo</a> theme</p> -->
+
+    </div>
+    <div class="full-toc">
+        <button class="full"><span class="min "></span></button>
+<button class="post-toc-menu"><span class="post-toc-menu-icons"></span></button>
+<div class="post-toc"><span class="post-toc-title">目录</span>
+    <div class="post-toc-content">
+
+    </div>
+</div>
+<a class id="rocket" href="javascript:void(0)"></a>
+    </div>
+</div>
+<div class="acParent"></div>
+
+<div class="hide_box" onclick="dashangToggle()"></div>
+<div class="shang_box">
+    <a class="shang_close" href="javascript:void(0)" onclick="dashangToggle()">×</a>
+    <div class="shang_tit">
+        <p>喜欢就点赞,疼爱就打赏</p>
+    </div>
+    <div class="shang_payimg">
+        <div class="pay_img">
+            <img src="/img/alipay.jpg" class="alipay" title="扫码支持">
+            <img src="/img/weixin.jpg" class="weixin" title="扫码支持">
+        </div>
+    </div>
+    <div class="shang_payselect">
+        <span><label><input type="radio" name="pay" checked value="alipay">支付宝</label></span><span><label><input type="radio" name="pay" value="weixin">微信</label></span>
+    </div>
+</div>
+
+</body>
+<script src="//cdn.bootcss.com/jquery.pjax/2.0.1/jquery.pjax.min.js"></script>
+
+<script src="/js/script.js"></script>
+<script>
+    var img_resize = 'default';
+    /*作者、标签的自动补全*/
+    $(function () {
+        $('.search').AutoComplete({
+            'data': ['#oauth2','#k8s','#keycloak','#日志','#qdsl','#jpa','#升级','#快捷键','#服务发现','#高可用','#hystrix','#转载','#数据库',],
+            'itemHeight': 20,
+            'width': 418
+        }).AutoComplete('show');
+    })
+    function initArticle() {
+        /*渲染对应的表格样式*/
+        
+            $(".post .pjax table").addClass("green_title");
+        
+
+        /*渲染打赏样式*/
+        
+        $("input[name=pay]").on("click", function () {
+            if($("input[name=pay]:checked").val()=="weixin"){
+                $(".shang_box .shang_payimg .pay_img").addClass("weixin_img");
+            } else {
+                $(".shang_box .shang_payimg .pay_img").removeClass("weixin_img");
+            }
+        })
+        
+
+        /*高亮代码块行号*/
+        
+        $('pre code').each(function(){
+            var lines = $(this).text().split('\n').length - 1;
+            var $numbering = $('<ul/>').addClass('pre-numbering').attr("unselectable","on");
+            $(this).addClass('has-numbering')
+                    .parent()
+                    .append($numbering);
+            for(i=1;i<=lines;i++){
+                $numbering.append($('<li/>').text(i));
+            }
+        });
+        
+
+        /*访问数量*/
+        
+        $.getScript("//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js");
+        
+
+        /*代码高亮，行号对齐*/
+        $('.pre-numbering').css('line-height',$('.has-numbering').css('line-height'));
+
+        
+    }
+
+    /*打赏页面隐藏与展示*/
+    
+    function dashangToggle() {
+        $(".shang_box").fadeToggle();
+        $(".hide_box").fadeToggle();
+    }
+    
+
+</script>
+
+<!--加入行号的高亮代码块样式-->
+
+<style>
+    pre{
+        position: relative;
+        margin-bottom: 24px;
+        border-radius: 10px;
+        border: 2px solid #e2dede;
+        background: #FFF;
+        overflow: hidden;
+    }
+    code.has-numbering{
+        margin-left: 30px;
+    }
+    .pre-numbering{
+        margin: 0px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 20px;
+        padding: 0.5em 3px 0.7em 5px;
+        border-right: 1px solid #C3CCD0;
+        text-align: right;
+        color: #AAA;
+        background-color: ;
+    }
+</style>
+
+<!--自定义样式设置-->
+<style>
+    
+    .nav-right nav a.hover, #local-search-result a.hover{
+        background-color: #e2e0e0;
+    }
+    
+    
+
+    /*列表样式*/
+    
+    .post .pjax article .article-entry>ol, .post .pjax article .article-entry>ul, .post .pjax article>ol, .post .pjax article>ul{
+        border: #e2dede solid 2px;
+        border-radius: 10px;
+        padding: 10px 32px 10px 56px;
+    }
+    .post .pjax article .article-entry li>ol, .post .pjax article .article-entry li>ul,.post .pjax article li>ol, .post .pjax article li>ul{
+        padding-top: 5px;
+        padding-bottom: 5px;
+    }
+    .post .pjax article .article-entry>ol>li, .post .pjax article .article-entry>ul>li,.post .pjax article>ol>li, .post .pjax article>ul>li{
+        margin-bottom: auto;
+        margin-left: auto;
+    }
+    .post .pjax article .article-entry li>ol>li, .post .pjax article .article-entry li>ul>li,.post .pjax article li>ol>li, .post .pjax article li>ul>li{
+        margin-bottom: auto;
+        margin-left: auto;
+    }
+    
+
+    /*引用块样式*/
+    
+    .post .pjax article blockquote {
+        padding: 10px 20px;
+        background-color: white;
+        border: none;
+        border-left: 4px solid #42b983;
+        border-right: 4px solid #42b983;
+        border-radius: 10px;
+    }
+    
+
+    /*文章列表背景图*/
+    
+    .nav-right:before {
+        content: ' ';
+        display: block;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.1;
+        background: url("https://imgchr.com/content/images/system/home_cover_1552414407320_3a5f92.jpg");
+        background-repeat: no-repeat;
+        background-position: 50% 0;
+        -ms-background-size: cover;
+        -o-background-size: cover;
+        -moz-background-size: cover;
+        -webkit-background-size: cover;
+        background-size: cover;
+    }
+    
+
+    
+    .post .pjax article :not(pre) > code {
+        color: #24292e;
+        font-family: SFMono-Regular,Consolas,Liberation Mono,Menlo,Courier,monospace;
+        background-color: rgba(27,31,35,.05);
+        border-radius: 3px;
+        font-size: 85%;
+        margin: 0;
+        padding: .2em .4em;
+    }
+    
+</style>
+
+
+
+
+
+
+
+</html>
